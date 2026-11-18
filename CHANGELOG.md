@@ -1,5 +1,14 @@
 # Wijzigingen
 
+## 0.22.1 — 2026-11-18
+
+De lockfile van de werkplaats past bij de nieuwe versies; zonder deze stap breekt `npm ci` bij het bouwen op VPS 1 en 3.
+
+- oa-services 0.6.1: anonimiseren vindt meer in tabellen en rekenbladen (kolomkoppen, doorzetten, BSN met puntjes, postcodes met SA/SD/SS, geboortedatum).
+- oa-adapters 0.20.1 (LibreOffice-extensie 0.16.0): datums en getallen in Calc en Excel zoals de cel ze toont, en plaatshouders ook in zulke cellen.
+- oa-kern 0.9.0 en oa-paneel 0.13.0: Toegankelijkheid — *Alles herstellen*.
+- Uitrollen: `bijwerken.sh` op VPS 3 (diensten) en VPS 1 (toegang); daarna de LibreOffice-extensie opnieuw installeren via `https://oa.<domein>/libreoffice`.
+
 ## 0.22.0 — 2026-11-11
 
 **Het gemeenschapsplatform heeft een eigen repo**: [digitaalgemeengoed/gemeenschap](https://github.com/digitaalgemeengoed/gemeenschap). De map `gemeenschap/` en `vps4-gemeenschap.yml` zijn hier weg. Op VPS 4 haalt `server/installeer.sh` die repo op naar `/opt/gemeenschap` en geeft door; daarna rolt de server zelf uit vanuit GitHub: pagina's en menu's (`inhoud/`) na elke samenvoeging op `main`, de rest bij een nieuwe versie-tag. Zie INRICHTING.md, stap 12.
