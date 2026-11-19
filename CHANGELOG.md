@@ -1,5 +1,12 @@
 # Wijzigingen
 
+## 0.25.0 — 2026-11-19
+
+De lockfile van de werkplaats past bij oa-contract 0.11.0, opendop-mini 0.16.0, oa-kern 0.12.1, oa-paneel 0.17.0, oa-adapters 0.20.5, oa-integratielaag 0.11.2 en oa-services 0.6.4: standaardattributen in het classificatiemodel, met een voorstel voor persoonsgegevens.
+
+- Uitrollen: eerst `bijwerken.sh` op VPS 2 (platform), daarna op VPS 1 (toegang: integratielaag, paneel en oa-beheer 0.15.0). Geen migratie. VPS 3 hoeft niet: het voorstel gebruikt de bestaande herkenning van persoonsgegevens.
+- Bestaande classificatiemodellen blijven werken. Heeft een gemeente een eigen attribuut met de sleutel van een standaardattribuut (zoals `persoonsgegevens` of `hotspot`), dan meldt de controle dat bij de volgende versie; zet dan het standaardattribuut aan.
+
 ## 0.24.1 — 2026-11-19
 
 **Sneller en zichtbaarder bouwen.**
