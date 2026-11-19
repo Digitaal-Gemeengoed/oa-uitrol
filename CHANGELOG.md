@@ -1,5 +1,9 @@
 # Wijzigingen
 
+## 0.26.0 — 2026-11-19
+
+De lockfile van de werkplaats past bij opendop-mini 0.17.0, oa-kern 0.12.2, oa-paneel 0.18.0 en oa-adapters 0.20.6: een vastgelegde classificatie toont het paneel met de versie van het classificatiemodel waarmee ze is vastgelegd. Geen migratie.
+
 ## 0.25.0 — 2026-11-19
 
 De lockfile van de werkplaats past bij oa-contract 0.11.0, opendop-mini 0.16.0, oa-kern 0.12.1, oa-paneel 0.17.0, oa-adapters 0.20.5, oa-integratielaag 0.11.2 en oa-services 0.6.4: standaardattributen in het classificatiemodel, met een voorstel voor persoonsgegevens.
