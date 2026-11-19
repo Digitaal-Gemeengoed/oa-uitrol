@@ -33,7 +33,15 @@ fi
 ok "Broncode opgehaald"
 # Alleen images van buiten ophalen; wat hier gebouwd wordt, slaat pull over.
 docker compose -f "$COMPOSE" --env-file .env pull --quiet --ignore-buildable --ignore-pull-failures 2>/dev/null || true
-docker compose -f "$COMPOSE" --env-file .env build --quiet
+# Bouwen met een log, zodat te zien is welke stap tijd kost.
+BOUWLOG="$OA_UITROL/bouw.log"
+BEGIN=$(date +%s)
+if ! docker compose -f "$COMPOSE" --env-file .env build --progress=plain >"$BOUWLOG" 2>&1; then
+  tail -n 30 "$BOUWLOG" >&2
+  stop "Bouwen lukte niet; de volledige uitvoer staat in $BOUWLOG. De draaiende containers zijn niet veranderd."
+fi
+ok "Gebouwd in $(( $(date +%s) - BEGIN )) s; de traagste stappen (log: $BOUWLOG):"
+traagste_stappen "$BOUWLOG" 5
 docker compose -f "$COMPOSE" --env-file .env up -d --remove-orphans
 if [ "$ROL" = toegang ]; then
   # Een gewijzigde Caddyfile geldt pas na herladen; certificaten blijven staan.

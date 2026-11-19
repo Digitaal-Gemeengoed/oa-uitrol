@@ -14,7 +14,7 @@ COPY oa-kern/package.json oa-kern/
 COPY oa-paneel/package.json oa-paneel/
 COPY oa-adapters/package.json oa-adapters/
 COPY oa-integratielaag/package.json oa-integratielaag/
-RUN npm ci --no-audit --no-fund
+RUN --mount=type=cache,target=/root/.npm npm ci --no-audit --no-fund --prefer-offline
 COPY . .
 # Volgorde telt: de werkomgeving moet in public/ staan vóór next build.
 RUN npm run build -w oa-contract \

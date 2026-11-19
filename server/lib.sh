@@ -23,6 +23,16 @@ ok()       { printf '  \033[32m✓\033[0m %s\n' "$*"; }
 waarschuw(){ printf '  \033[33m!\033[0m %s\n' "$*"; }
 stop()     { printf '\n\033[1;31mGestopt:\033[0m %s\n\n' "$*" >&2; exit 1; }
 
+# De traagste stappen uit een bouwlog van "docker compose build --progress=plain".
+traagste_stappen() {
+  awk '
+    /^#[0-9]+ \[/ { id = $1; $1 = ""; naam[id] = substr($0, 2) }
+    /^#[0-9]+ DONE [0-9.]+s$/ { t = $3; sub(/s$/, "", t); if ($1 in naam) printf "%.1f\t%s\n", t, naam[$1] }
+  ' "$1" | sort -rn | head -n "${2:-5}" | while IFS=$'\t' read -r sec stap; do
+    printf '      %6ss  %s\n' "$sec" "${stap:0:90}"
+  done || true
+}
+
 moet_root() {
   [ "$(id -u)" -eq 0 ] || stop "Start dit script met sudo ervoor, bijvoorbeeld: sudo $0"
 }

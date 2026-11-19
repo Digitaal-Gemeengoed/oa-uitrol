@@ -1,5 +1,12 @@
 # Wijzigingen
 
+## 0.24.1 — 2026-11-19
+
+**Sneller en zichtbaarder bouwen.**
+- `npm ci` in de Dockerfile gebruikt een BuildKit-cache voor npm (`--mount=type=cache,target=/root/.npm`, met `--prefer-offline`). Pakketten die eerder zijn opgehaald, komen dan van de eigen schijf; een nieuw versienummer of een nieuwe lockfile hoeft niet alles opnieuw te downloaden. De eerste keer bouwen vult de cache.
+- `bijwerken.sh` bouwt met een log in `/opt/oa-uitrol/bouw.log` en meldt hoe lang het bouwen duurde, met de vijf traagste stappen. Mislukt het bouwen, dan toont het de laatste 30 regels en stopt het; de draaiende containers blijven ongewijzigd (voorheen ging het script na een mislukte build door).
+- Uitrollen: `bijwerken.sh` op de VPS'en die bouwen (1, 2 en 3), wanneer het uitkomt. Er verandert niets aan de werking.
+
 ## 0.24.0 — 2026-11-19
 
 De lockfile van de werkplaats past bij oa-contract 0.10.0, opendop-mini 0.15.0, oa-kern 0.12.0, oa-paneel 0.16.0, oa-adapters 0.20.4, oa-integratielaag 0.11.1 en oa-services 0.6.3 (alleen de afhankelijkheid): ondersteunende stukken met categorieën (O1 tot en met O5) en toetsvragen.
