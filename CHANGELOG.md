@@ -1,5 +1,11 @@
 # Wijzigingen
 
+## 0.22.2 — 2026-11-19
+
+De lockfile van de werkplaats past bij oa-contract 0.8.2 en opendop-mini 0.12.0 (ingangsdatum voor modelversies).
+
+- Uitrollen: eerst `bijwerken.sh` op VPS 2 (platform; voert migratie `010_ingang.sql` uit), daarna op VPS 1 (oa-beheer 0.10.0).
+
 ## 0.22.1 — 2026-11-18
 
 De lockfile van de werkplaats past bij de nieuwe versies; zonder deze stap breekt `npm ci` bij het bouwen op VPS 1 en 3.
