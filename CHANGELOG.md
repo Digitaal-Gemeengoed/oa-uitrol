@@ -1,5 +1,12 @@
 # Wijzigingen
 
+## 0.24.0 — 2026-11-19
+
+De lockfile van de werkplaats past bij oa-contract 0.10.0, opendop-mini 0.15.0, oa-kern 0.12.0, oa-paneel 0.16.0, oa-adapters 0.20.4, oa-integratielaag 0.11.1 en oa-services 0.6.3 (alleen de afhankelijkheid): ondersteunende stukken met categorieën (O1 tot en met O5) en toetsvragen.
+
+- Uitrollen: eerst `bijwerken.sh` op VPS 2 (platform), daarna op VPS 1 (toegang: integratielaag, paneel en oa-beheer 0.14.0). Geen migratie. De LibreOffice-extensie hoeft niet opnieuw. VPS 3 (diensten) hoeft niet.
+- Bestaande classificatiemodellen blijven werken: zonder categorieën is er één soort ondersteunend stuk, zoals voorheen. De categorieën komen er pas als informatiebeheer ze in het beheerportaal laadt en publiceert.
+
 ## 0.23.0 — 2026-11-19
 
 De lockfile van de werkplaats past bij oa-contract 0.9.0, opendop-mini 0.14.0, oa-kern 0.11.0, oa-paneel 0.15.0, oa-adapters 0.20.3, oa-integratielaag 0.11.0 en oa-services 0.6.2 (alleen de afhankelijkheid): classificeren met de klasse van de zaak, ondersteunende stukken en eigen zoektermen.
