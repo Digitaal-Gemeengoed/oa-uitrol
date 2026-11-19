@@ -1,5 +1,11 @@
 # Wijzigingen
 
+## 0.23.0 — 2026-11-19
+
+De lockfile van de werkplaats past bij oa-contract 0.9.0, opendop-mini 0.14.0, oa-kern 0.11.0, oa-paneel 0.15.0, oa-adapters 0.20.3, oa-integratielaag 0.11.0 en oa-services 0.6.2 (alleen de afhankelijkheid): classificeren met de klasse van de zaak, ondersteunende stukken en eigen zoektermen.
+
+- Uitrollen: eerst `bijwerken.sh` op VPS 2 (platform), daarna op VPS 1 (toegang: integratielaag, paneel en oa-beheer 0.13.0). Geen migratie. De LibreOffice-extensie hoeft niet opnieuw. VPS 3 (diensten) hoeft niet: daar verandert niets; de volgende keer bijwerken neemt de nieuwe lockfile mee.
+
 ## 0.22.4 — 2026-11-19
 
 De lockfile van de werkplaats past bij oa-kern 0.10.0, oa-paneel 0.14.0 en oa-adapters 0.20.2 (Classificeren: kiezen in stappen).
