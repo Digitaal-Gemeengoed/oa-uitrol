@@ -1,5 +1,11 @@
 # Wijzigingen
 
+## 0.22.3 — 2026-11-19
+
+De lockfile van de werkplaats past bij opendop-mini 0.13.0 (een geplande modelversie wijzigen).
+
+- Uitrollen: eerst `bijwerken.sh` op VPS 2 (platform; voert migratie `011_vervangen.sql` uit), daarna op VPS 1 (oa-beheer 0.11.0).
+
 ## 0.22.2 — 2026-11-19
 
 De lockfile van de werkplaats past bij oa-contract 0.8.2 en opendop-mini 0.12.0 (ingangsdatum voor modelversies).
