@@ -1,5 +1,11 @@
 # Wijzigingen
 
+## 0.22.4 — 2026-11-19
+
+De lockfile van de werkplaats past bij oa-kern 0.10.0, oa-paneel 0.14.0 en oa-adapters 0.20.2 (Classificeren: kiezen in stappen).
+
+- Uitrollen: `bijwerken.sh` op VPS 1 (toegang). Word, LibreOffice en de demo laden het nieuwe paneel vanzelf van de server; de LibreOffice-extensie hoeft niet opnieuw.
+
 ## 0.22.3 — 2026-11-19
 
 De lockfile van de werkplaats past bij opendop-mini 0.13.0 (een geplande modelversie wijzigen).
