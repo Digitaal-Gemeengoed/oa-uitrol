@@ -75,6 +75,7 @@ Keycloak 26 draait op VPS 3 (realm `gemeenten`, uit `keycloak/realm-gemeenten.js
 - Het beheerportaal is de client `oa-beheer` en eist een tweede factor (`server/keycloak-beheer.sh` richt dat in).
 - Per medewerker: het attribuut `gemeente` (bijvoorbeeld `haarlem`; die gemeente moet ook in `GEMEENTEN` op VPS 2 staan), de rol `medewerker` (of `beheerder`) en een niveau voor persoonsgegevens `ppl-1`, `ppl-2` of `ppl-3`.
 - `keycloak-beheer.sh` zet de blokkade na tien foute wachtwoorden aan en laat nieuwe eigen gebruikers bij de eerste inlog een authenticator-app koppelen.
+- Het inlogscherm heeft de stijl van de panelen (thema `oa`, zie [keycloak-thema/README.md](keycloak-thema/README.md)) en de huisstijl van de inrichting (`OA_HUISSTIJL`, zie [huisstijl/README.md](huisstijl/README.md)).
 
 ## Wat is getest
 

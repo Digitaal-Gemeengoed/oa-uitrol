@@ -16,7 +16,7 @@ Het inlogscherm van Keycloak in de stijl van de OA-panelen: dezelfde kop (icoon,
 
 ## Huisstijl
 
-Kleuren en lettertype komen uit de huisstijl van de inrichting: `OA_HUISSTIJL` in `.env`, een naam uit `../huisstijl/catalogus.txt`. `bijwerken.sh` haalt die CSS van npm en koppelt hem in Keycloak aan als `resources/huisstijl/huisstijl.css`. De klasse komt via `OA_HUISSTIJL_KLASSE` in `theme.properties` (`${env.OA_HUISSTIJL_KLASSE:voorbeeld-theme}`).
+Kleuren en lettertype komen uit de huisstijl van de inrichting: `OA_HUISSTIJL` in `.env`, een naam uit `../huisstijl/catalogus.txt` (zie [../huisstijl/README.md](../huisstijl/README.md)). `bijwerken.sh` haalt die CSS van npm en koppelt hem in Keycloak aan als `resources/huisstijl/huisstijl.css`. De klasse komt via `OA_HUISSTIJL_KLASSE` in `theme.properties` (`${env.OA_HUISSTIJL_KLASSE:voorbeeld-theme}`).
 
 Zonder instelling blijft het voorbeeldthema van NL Design System over (`css/voorbeeld-theme.css`, meegeleverd). Dat geldt ook voor een inrichting die meerdere gemeenten bedient (bijvoorbeeld een GR), tenzij die een eigen huisstijl kiest: vóór het inloggen weet Keycloak nog niet bij welke gemeente je hoort.
 
