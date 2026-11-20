@@ -1,5 +1,10 @@
 # Wijzigingen
 
+## 0.30.2 — 2026-11-20
+
+- **Herstel:** Keycloak startte niet meer na 0.30.0/0.30.1 ("error mounting … /opt/keycloak/themes/oa/login/resources/huisstijl … read-only file system"). De huisstijl wordt gekoppeld binnen de alleen-lezen koppeling van het thema, en daar kan Docker het koppelpunt niet zelf aanmaken. De map staat nu in de repo (`keycloak-thema/oa/login/resources/huisstijl/`). Nagespeeld met Docker: zonder de map dezelfde fout, met de map werkt het.
+- Uitrollen: `bijwerken.sh` op VPS 3. Geen migratie.
+
 ## 0.30.1 — 2026-11-20
 
 - **Herstel:** `bijwerken.sh` stopte zonder melding direct na "oa-uitrol …" op VPS 1 en VPS 3, zolang er nog geen huisstijl was opgehaald. De controlesom van het ontbrekende `huisstijl/huisstijl.css` mislukte, en onder `set -o pipefail` stopt het script dan. Nu geeft `controlesom` voor een ontbrekend bestand "geen".

@@ -1,0 +1,4 @@
+Koppelpunt voor de huisstijl van de inrichting (zie huisstijl/README.md).
+vps3-diensten.yml koppelt ../../../../huisstijl hierover, alleen-lezen. De map
+moet in git staan: binnen de alleen-lezen koppeling van het thema kan Docker
+zelf geen map aanmaken.
