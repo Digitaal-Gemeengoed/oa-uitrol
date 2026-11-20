@@ -23,6 +23,7 @@ Alles over het prototype van de Office Assistent van Digitaal GemeenGoed op éé
   - [Classificeren, bewaren en vergrendelen](ontwerp/classificeren-en-vergrendelen.md)
   - [Anonimiseren in het document](ontwerp/anonimiseren-in-het-document.md)
   - [Kwaliteit van het anonimiseren](ontwerp/kwaliteit-anonimiseren.md)
+  - [Documenteigenschappen en de titel](ontwerp/documenteigenschappen.md)
 
 De ontwerpen noemen de versies waarin ze zijn gebouwd. Wat daarna veranderde, staat in de changelogs van de repositories.
 

@@ -1,5 +1,11 @@
 # Wijzigingen
 
+## 0.31.0 — 2026-11-20
+
+- **Documenteigenschappen en de titel.** Ontwerp in `docs/ontwerp/documenteigenschappen.md`: de documenttitel volgens WCAG 2.4.2 in de eigenschappen, hooguit één regel met het opmaakprofiel Titel, metadata en eigenschappen in beide richtingen, en anonimiseren van de eigenschappen (auteur wordt de organisatie).
+- Werkplaats: oa-contract 0.13.0, opendop-mini 0.18.1, oa-kern 0.13.0, oa-services 0.7.0, oa-paneel 0.21.0, oa-adapters 0.21.0 (LibreOffice-extensie 0.17.0), oa-integratielaag 0.13.1.
+- Uitrollen: `bijwerken.sh` op VPS 3 (diensten), dan VPS 1 (toegang). VPS 2 (platform) mag mee voor opendop-mini 0.18.1; daar verandert niets aan het gedrag. Geen migratie. In LibreOffice de extensie 0.17.0 opnieuw installeren.
+
 ## 0.30.2 — 2026-11-20
 
 - **Herstel:** Keycloak startte niet meer na 0.30.0/0.30.1 ("error mounting … /opt/keycloak/themes/oa/login/resources/huisstijl … read-only file system"). De huisstijl wordt gekoppeld binnen de alleen-lezen koppeling van het thema, en daar kan Docker het koppelpunt niet zelf aanmaken. De map staat nu in de repo (`keycloak-thema/oa/login/resources/huisstijl/`). Nagespeeld met Docker: zonder de map dezelfde fout, met de map werkt het.
