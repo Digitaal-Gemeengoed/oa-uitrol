@@ -1,5 +1,13 @@
 # Wijzigingen
 
+## 0.28.0 — 2026-11-20
+
+**Bijwerken zonder wachtwoord.** `beheer` mag `sudo /opt/oa-uitrol/server/bijwerken.sh` starten zonder het sudo-wachtwoord; op VPS 4 geldt dat ook voor `uitrol.sh` en `bijwerken.sh` van het gemeenschapsplatform. Voor elk ander commando blijft sudo om het wachtwoord vragen.
+
+- De regel staat in `/etc/sudoers.d/oa-bijwerken` en wordt gecontroleerd met `visudo` voordat hij wordt geplaatst. Hij komt er alleen als de repo's en `/opt` van root zijn en voor anderen alleen-lezen; anders zou wie de scripts kan wijzigen root worden.
+- Uitrollen: één keer `bijwerken.sh` op elke VPS, met wachtwoord. Daarna is het niet meer nodig. Geen migratie.
+- Uitzetten: `sudo OA_SUDO_ZONDER_WACHTWOORD=nee /opt/oa-uitrol/server/bijwerken.sh`.
+
 ## 0.27.1 — 2026-11-20
 
 **De repo's staan nu in de organisatie [Digitaal-Gemeengoed](https://github.com/Digitaal-Gemeengoed).** `haal-op.sh` haalt standaard daar op, het gemeenschapsplatform komt van `Digitaal-Gemeengoed/gemeenschap`, en alle links in de documentatie en de downloadpagina wijzen naar de nieuwe plek.

@@ -135,6 +135,47 @@ zet_env() {
   mv "$tijdelijk" "$bestand"
 }
 
+# Laat de beheerder (standaard "beheer") de bijwerkscripts zonder wachtwoord
+# met sudo starten, en verder niets. Alleen als niemand anders dan root de
+# scripts kan wijzigen: anders zou dit iedereen met schrijfrechten root geven.
+# Uitzetten: OA_SUDO_ZONDER_WACHTWOORD=nee.
+SUDO_REGELBESTAND=/etc/sudoers.d/oa-bijwerken
+sudo_zonder_wachtwoord() {
+  local gebruiker="${OA_BEHEERDER:-beheer}" scripts=() map s regels tijdelijk
+  if [ "${OA_SUDO_ZONDER_WACHTWOORD:-ja}" = nee ]; then
+    rm -f "$SUDO_REGELBESTAND"; return 0
+  fi
+  id "$gebruiker" >/dev/null 2>&1 || return 0
+  command -v visudo >/dev/null || return 0
+  scripts=("$OA_UITROL/server/bijwerken.sh")
+  for s in uitrol.sh bijwerken.sh; do
+    [ -f "$GEMEENSCHAP_MAP/server/$s" ] && scripts+=("$GEMEENSCHAP_MAP/server/$s")
+  done
+  # Alles in de repo's en de mappen erboven moet van root zijn en voor anderen
+  # alleen-lezen (git gebruikt geen symlinks naar buiten; die slaan we over).
+  for map in "$OA_UITROL" "$GEMEENSCHAP_MAP"; do
+    [ -d "$map" ] || continue
+    if [ -n "$(find "$map" -path "$map/bron" -prune -o \( ! -type l \) \( ! -user root -o -perm /022 \) -print -quit)" ] \
+       || [ -n "$(find /opt -maxdepth 0 \( ! -user root -o -perm /022 \) -print)" ]; then
+      waarschuw "Sudo zonder wachtwoord niet ingesteld: in $map kan iemand anders dan root bestanden wijzigen."
+      echo "  Zoek ze met: sudo find $map \\( ! -user root -o -perm /022 \\) -not -type l"
+      rm -f "$SUDO_REGELBESTAND"; return 0
+    fi
+  done
+  regels="# Door oa-uitrol (lib.sh, sudo_zonder_wachtwoord). Niet met de hand wijzigen."
+  for s in "${scripts[@]}"; do regels+=$'\n'"$gebruiker ALL=(root) NOPASSWD: $s"; done
+  [ -f "$SUDO_REGELBESTAND" ] && [ "$(cat "$SUDO_REGELBESTAND")" = "$regels" ] && return 0
+  tijdelijk="$(mktemp)"
+  printf '%s\n' "$regels" > "$tijdelijk"
+  if visudo -cqf "$tijdelijk"; then
+    install -m 0440 -o root -g root "$tijdelijk" "$SUDO_REGELBESTAND"
+    ok "$gebruiker mag de bijwerkscripts nu zonder wachtwoord starten (met het volledige pad)"
+  else
+    waarschuw "De sudo-regel klopt niet; niets gewijzigd."
+  fi
+  rm -f "$tijdelijk"
+}
+
 geldig_domein() { [[ "$1" =~ ^([a-z0-9]([a-z0-9-]*[a-z0-9])?\.)+[a-z]{2,}$ ]]; }
 geldig_ip()     { [[ "$1" =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}$ ]]; }
 geldige_wg()    { [[ "$1" =~ ^[A-Za-z0-9+/]{42}[AEIMQUYcgkosw048]=$ ]]; }

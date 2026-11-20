@@ -33,6 +33,7 @@ if [ -z "${OA_BIJGEWERKT:-}" ]; then
   OA_BIJGEWERKT=1 exec "$HIER/bijwerken.sh" "$@"
 fi
 ok "oa-uitrol $(git rev-parse --short HEAD)"
+sudo_zonder_wachtwoord
 # VPS 4 (gemeenschap) werkt zichzelf bij vanuit GitHub (gemeenschap/server/uitrol.sh).
 if [ "$ROL" = gemeenschap ]; then
   ok "De basis van de server is bijgewerkt. Het gemeenschapsplatform rolt zelf uit vanuit GitHub;"

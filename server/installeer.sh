@@ -17,6 +17,7 @@ ROL="$(rol)"
 if [ "$ROL" = gemeenschap ]; then
   [ -d "$GEMEENSCHAP_MAP/.git" ] || git clone --quiet "$GEMEENSCHAP_REPO" "$GEMEENSCHAP_MAP" \
     || stop "$GEMEENSCHAP_REPO ophalen lukte niet."
+  sudo_zonder_wachtwoord
   exec "$GEMEENSCHAP_MAP/server/installeer.sh" "$@"
 fi
 [ -s "$OA_MAP/gedeeld.env" ] || stop "Deze VPS is nog niet gekoppeld. Draai eerst koppelen.sh."
@@ -38,6 +39,7 @@ wacht_op() {
 }
 
 meld "Installeren op $(vps_naam "$ROL")"
+sudo_zonder_wachtwoord
 
 # --- Afhankelijkheden: draaien de VPS'en die deze nodig heeft al? ------------
 case "$ROL" in

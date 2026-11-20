@@ -94,7 +94,7 @@ Het script vraagt:
 
 1. **Welke VPS dit is** (1, 2 of 3; 4 is het gemeenschapsplatform, zie stap 12).
 2. **Je publieke SSH-sleutel**, als je die niet al bij de bestelling hebt opgegeven. Plak de regel uit stap 1.
-3. **Een wachtwoord voor de gebruiker `beheer`.** Dat heb je nodig als je `sudo` typt, niet bij het inloggen. Bewaar het in je wachtwoordmanager.
+3. **Een wachtwoord voor de gebruiker `beheer`.** Dat heb je nodig als je `sudo` typt, niet bij het inloggen. Bewaar het in je wachtwoordmanager. Alleen `bijwerken.sh` vraagt er straks niet meer om (zie stap 10, *Dagelijks beheer*).
 
 Daarna werkt het een paar minuten zelf door. Het laat aan het eind een **koppelregel** zien, zoals
 
@@ -408,6 +408,8 @@ Bewaar die niet op dezelfde plek als `/opt/oa-uitrol/.env`: met `BEHEER_ADMIN_SE
 | **Na elke herstart van VPS 3** | `sudo /opt/oa-uitrol/server/ontzegel.sh` en plak de ontzegelsleutel |
 | Beheerportaal: draait het, wat staat aan | `sudo /opt/oa-uitrol/server/beheer.sh status` (op VPS 1) |
 | Logboek van een onderdeel | `cd /opt/oa-uitrol && sudo docker compose -f vps2-platform.yml logs --tail 100 platform` |
+
+**Bijwerken zonder wachtwoord.** `installeer.sh` en `bijwerken.sh` zetten een sudo-regel in `/etc/sudoers.d/oa-bijwerken`: `beheer` mag `bijwerken.sh` zonder wachtwoord starten (op VPS 4 ook `uitrol.sh` en `bijwerken.sh` van het gemeenschapsplatform), en verder niets. Typ dan wel het volledige pad, zoals hierboven; met `cd` en `./bijwerken.sh` vraagt sudo toch om het wachtwoord. De regel komt er alleen als niemand anders dan root de scripts kan wijzigen; anders meldt het script welke map niet klopt. Liever niet? Zet `OA_SUDO_ZONDER_WACHTWOORD=nee` voor het commando: `sudo OA_SUDO_ZONDER_WACHTWOORD=nee /opt/oa-uitrol/server/bijwerken.sh` haalt de regel weer weg.
 
 **Anonimiseren** gebruikt OpenAnonymiser van Conduction op VPS 3, alleen intern bereikbaar. `bijwerken.sh` bouwt het uit de broncode, op de vaste versie in `haal-op.sh`. De eerste keer duurt dat enkele minuten, want het Nederlandse taalmodel wordt meegebouwd. Het gebruikt ongeveer 1 GB geheugen; kijk met `free -h` of VPS 3 dat over heeft. Draait het niet, dan zegt de module Anonimiseren dat; de rest van de assistent werkt gewoon. Logboek: `cd /opt/oa-uitrol && sudo docker compose -f vps3-diensten.yml logs --tail 50 openanonymiser`.
 
