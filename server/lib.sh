@@ -176,6 +176,37 @@ sudo_zonder_wachtwoord() {
   rm -f "$tijdelijk"
 }
 
+# Inlogthema van Keycloak (VPS 3). Keycloak houdt thema's in het geheugen, dus
+# na een wijziging in keycloak-thema/ eerst herstarten (tweede argument "ja").
+# Daarna het thema op het realm zetten: de realm-import doet dat alleen bij
+# een nieuwe server. OA_LOGIN_THEMA in .env kiest een ander thema
+# (bijvoorbeeld keycloak.v2, het standaardthema van Keycloak).
+keycloak_thema() {
+  local compose="$1" herstart="${2:-nee}" env="$OA_UITROL/.env" thema gebruiker wachtwoord binnen=nee
+  thema="$(sed -n 's/^OA_LOGIN_THEMA=//p' "$env" | tail -1)"; thema="${thema:-oa}"
+  gebruiker="$(sed -n 's/^KC_BEHEERDER=//p' "$env" | tail -1)"
+  wachtwoord="$(sed -n 's/^KC_BEHEERDER_WACHTWOORD=//p' "$env" | tail -1)"
+  kcadm() { docker compose -f "$compose" --env-file "$env" exec -T keycloak /opt/keycloak/bin/kcadm.sh "$@" --config /tmp/oa-kcadm.config; }
+  if [ "$herstart" = ja ]; then
+    docker compose -f "$compose" --env-file "$env" restart keycloak >/dev/null && ok "Keycloak herstart voor het nieuwe inlogthema"
+  fi
+  for _ in $(seq 1 30); do
+    kcadm config credentials --server http://localhost:8080 --realm master \
+      --user "${gebruiker:-beheer}" --password "$wachtwoord" >/dev/null 2>&1 && { binnen=ja; break; }
+    sleep 3
+  done
+  if [ "$binnen" = nee ]; then
+    waarschuw "Inlogthema niet ingesteld: inloggen op Keycloak lukte niet. Kijk met: sudo docker compose -f $compose logs keycloak"
+    return 0
+  fi
+  if kcadm update realms/gemeenten -s "loginTheme=$thema" >/dev/null 2>&1; then
+    ok "Inlogthema: $thema"
+  else
+    waarschuw "Inlogthema $thema instellen lukte niet."
+  fi
+  docker compose -f "$compose" --env-file "$env" exec -T keycloak rm -f /tmp/oa-kcadm.config >/dev/null 2>&1 || true
+}
+
 geldig_domein() { [[ "$1" =~ ^([a-z0-9]([a-z0-9-]*[a-z0-9])?\.)+[a-z]{2,}$ ]]; }
 geldig_ip()     { [[ "$1" =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}$ ]]; }
 geldige_wg()    { [[ "$1" =~ ^[A-Za-z0-9+/]{42}[AEIMQUYcgkosw048]=$ ]]; }

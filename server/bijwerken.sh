@@ -27,10 +27,12 @@ if [ -z "${OA_BIJGEWERKT:-}" ]; then
         ok "Remote van $MAP naar Digitaal-Gemeengoed" ;;
     esac
   done
+  OA_THEMA_VOOR="$(git rev-parse -q --verify HEAD:keycloak-thema 2>/dev/null || echo geen)"
   git pull --ff-only --quiet || stop "oa-uitrol ophalen van GitHub lukte niet. Controleer de internetverbinding en probeer opnieuw."
   # Opnieuw starten met de nieuwe scripts: dit script en lib.sh zijn al
   # ingelezen in de oude versie, en die kent nieuwe instellingen nog niet.
-  OA_BIJGEWERKT=1 exec "$HIER/bijwerken.sh" "$@"
+  # Is het inlogthema veranderd, dan moet Keycloak (VPS 3) herstarten.
+  OA_BIJGEWERKT=1 OA_THEMA_VOOR="$OA_THEMA_VOOR" exec "$HIER/bijwerken.sh" "$@"
 fi
 ok "oa-uitrol $(git rev-parse --short HEAD)"
 sudo_zonder_wachtwoord
@@ -59,6 +61,10 @@ if [ "$ROL" = toegang ]; then
   # Een gewijzigde Caddyfile geldt pas na herladen; certificaten blijven staan.
   docker compose -f "$COMPOSE" --env-file .env exec -T proxy caddy reload --config /etc/caddy/Caddyfile --adapter caddyfile >/dev/null 2>&1 \
     && ok "Caddy herladen" || waarschuw "Caddy herladen lukte niet; kijk met: sudo docker compose -f $COMPOSE logs proxy"
+fi
+if [ "$ROL" = diensten ]; then
+  THEMA_NU="$(git rev-parse -q --verify HEAD:keycloak-thema 2>/dev/null || echo geen)"
+  keycloak_thema "$COMPOSE" "$([ "${OA_THEMA_VOOR:-geen}" != "$THEMA_NU" ] && echo ja || echo nee)"
 fi
 docker image prune -f >/dev/null
 ok "Bijgewerkt"

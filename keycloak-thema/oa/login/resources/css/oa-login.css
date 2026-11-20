@@ -1,0 +1,130 @@
+/*
+ * Inlogpagina's van de Office Assistent. Kleuren en lettertype komen uit het
+ * voorbeeldthema van NL Design System, net als in de panelen; de compacte
+ * maten hieronder zijn dezelfde als in oa-paneel/src/paneel.css.
+ */
+html.oa-html { background: var(--utrecht-document-background-color, #fff); }
+
+body.oa-login {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--utrecht-document-background-color, #fff);
+  color: var(--utrecht-document-color, #1d1d1b);
+  font-family: var(--utrecht-document-font-family, system-ui, sans-serif);
+  --oa-tekst: 0.875rem;
+  --oa-primair: var(--utrecht-button-primary-action-background-color, #1a5ea8);
+  --utrecht-paragraph-font-size: var(--oa-tekst);
+  --utrecht-paragraph-line-height: 1.45;
+  --utrecht-paragraph-small-font-size: 0.8125rem;
+  --utrecht-heading-2-font-size: 1.25rem;
+  --utrecht-heading-2-line-height: 1.3;
+  --utrecht-form-label-font-size: var(--oa-tekst);
+  --utrecht-form-label-line-height: 1.4;
+  --utrecht-form-field-description-font-size: 0.8125rem;
+  --utrecht-button-font-size: var(--oa-tekst);
+  --utrecht-button-line-height: 1.3;
+  --utrecht-button-min-block-size: 40px;
+  --utrecht-button-padding-block-start: 8px;
+  --utrecht-button-padding-block-end: 8px;
+  --utrecht-button-padding-inline-start: 14px;
+  --utrecht-button-padding-inline-end: 14px;
+  --utrecht-textbox-font-size: var(--oa-tekst);
+  --utrecht-textbox-padding-block-start: 8px;
+  --utrecht-textbox-padding-block-end: 8px;
+  --utrecht-textbox-padding-inline-start: 10px;
+  --utrecht-textbox-padding-inline-end: 10px;
+  --utrecht-alert-padding-block-start: 10px;
+  --utrecht-alert-padding-block-end: 10px;
+  --utrecht-alert-padding-inline-start: 12px;
+  --utrecht-alert-padding-inline-end: 12px;
+  font-size: var(--oa-tekst);
+}
+.oa-login *, .oa-login *::before, .oa-login *::after { box-sizing: border-box; }
+
+/* Smal (zijpaneel): de hele breedte. Breed (browser): een kaart in het midden. */
+.oa-pagina { display: flex; justify-content: center; padding: 16px; }
+.oa-kaart { width: 100%; max-width: 26rem; display: flex; flex-direction: column; gap: 16px; }
+@media (min-width: 40rem) {
+  html.oa-html, body.oa-login { background: #f3f3f3; }
+  .oa-pagina { padding: 64px 16px; }
+  .oa-kaart { background: var(--utrecht-document-background-color, #fff); border: 1px solid var(--utrecht-separator-color, #ddd); border-radius: 6px; padding: 24px; }
+}
+
+/* Kop zoals in het paneel: icoon, titel, korte uitleg, met een lijn eronder. */
+.oa-kop { display: flex; align-items: flex-start; gap: 10px; border-bottom: 1px solid var(--utrecht-separator-color, #ccc); padding-bottom: 10px; }
+.oa-kop > div { flex: 1; min-width: 0; }
+.oa-kop-icoon { flex: none; margin-top: 18px; color: var(--oa-primair); }
+.oa-merk { margin: 0 0 2px; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.02em; color: var(--utrecht-paragraph-small-color, #555); }
+.oa-kop .utrecht-heading-2 { margin: 0 0 2px; }
+.oa-onder, .oa-login .utrecht-paragraph { margin: 0; }
+.oa-onder { color: var(--utrecht-paragraph-small-color, #555); }
+.oa-verplicht { margin: 0; }
+.oa-verplicht .required, .oa-login .required { color: var(--utrecht-form-field-error-message-color, #c00); }
+
+/* Inhoud */
+#kc-content { display: flex; flex-direction: column; gap: 14px; }
+#kc-form, #kc-form-wrapper { display: contents; }
+.oa-login form { display: flex; flex-direction: column; gap: 14px; margin: 0; }
+.oa-veld { display: flex; flex-direction: column; gap: 4px; margin: 0; }
+.oa-veld > *, .oa-label, .oa-invoer { margin: 0; }
+.oa-label, .oa-invoer { display: contents; }
+.oa-login .utrecht-textbox, .oa-login .utrecht-textarea, .oa-login select { width: 100%; max-inline-size: none; }
+.oa-fout { font-size: 0.8125rem; color: var(--utrecht-form-field-error-message-color, #c00); }
+.oa-veld:has([aria-invalid="true"]) .utrecht-textbox { border-color: var(--utrecht-form-field-error-message-color, #c00); }
+
+/* Wachtwoord met oog-knop */
+.oa-invoergroep { display: flex; }
+.oa-invoergroep .utrecht-textbox { flex: 1; min-width: 0; border-start-end-radius: 0; border-end-end-radius: 0; }
+.oa-oog-knop {
+  flex: none; width: 44px; display: inline-flex; align-items: center; justify-content: center;
+  border: var(--utrecht-textbox-border-width, 1px) solid var(--utrecht-textbox-border-color, #767676); border-inline-start: 0;
+  border-start-end-radius: var(--utrecht-textbox-border-radius, 0); border-end-end-radius: var(--utrecht-textbox-border-radius, 0);
+  background: var(--utrecht-textbox-background-color, #fff); color: inherit; cursor: pointer; padding: 0;
+}
+.oa-oog-knop:focus-visible { outline: 2px solid var(--utrecht-focus-outline-color, var(--oa-primair)); outline-offset: -3px; }
+.oa-oog {
+  display: block; width: 20px; height: 20px; background: currentColor;
+  -webkit-mask: var(--oa-oog-icoon) center / contain no-repeat; mask: var(--oa-oog-icoon) center / contain no-repeat;
+  --oa-oog-icoon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z'/%3E%3Ccircle cx='12' cy='12' r='3'/%3E%3C/svg%3E");
+}
+.oa-oog--dicht {
+  --oa-oog-icoon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M17.9 17.9A10.4 10.4 0 0 1 12 19C5 19 1 12 1 12a18.5 18.5 0 0 1 5.1-5.9M9.9 5.2A9.1 9.1 0 0 1 12 5c7 0 11 7 11 7a18.6 18.6 0 0 1-2.2 3.2M14.1 14.1a3 3 0 1 1-4.2-4.2'/%3E%3Cpath d='M1 1l22 22'/%3E%3C/svg%3E");
+}
+
+/* Opties (onthouden, wachtwoord vergeten) */
+.oa-opties, #kc-form-options { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; font-size: 0.8125rem; }
+.oa-opties-rij { display: flex; gap: 8px; }
+/* Keycloak zet lege optieblokken neer als onthouden en wachtwoord vergeten uit staan. */
+.oa-opties:not(:has(input, a, button)), #kc-form-options:not(:has(input, a, button)), .oa-opties-rij:not(:has(*)) { display: none; }
+.oa-login .checkbox label { display: inline-flex; align-items: center; gap: 6px; }
+.oa-login input[type="checkbox"], .oa-login input[type="radio"] { width: 16px; height: 16px; accent-color: var(--oa-primair); margin: 0; }
+
+/* Knoppen */
+.oa-knoppen, #kc-form-buttons { display: flex; flex-direction: column; gap: 8px; margin: 0; }
+/* De hoofdknop is even breed als zijn tekst, zoals in het paneel; knoppen voor
+   andere manieren van inloggen (later bijvoorbeeld Entra ID) vullen de breedte. */
+.oa-login .oa-knop-breed { inline-size: 100%; justify-content: center; }
+.oa-login input.utrecht-button { font-family: inherit; }
+.oa-linkknop { font: inherit; font-size: 0.8125rem; border: 0; padding: 0; background: none; color: var(--utrecht-link-color, var(--oa-primair)); text-decoration: underline; cursor: pointer; align-self: flex-start; }
+
+/* Links in de pagina's van Keycloak hebben geen eigen klasse */
+.oa-login a { color: var(--utrecht-link-color, var(--oa-primair)); }
+.oa-login a:hover { color: var(--utrecht-link-hover-color, var(--utrecht-link-color, var(--oa-primair))); }
+.oa-login a:focus-visible { outline: 2px solid var(--utrecht-focus-outline-color, var(--oa-primair)); outline-offset: 2px; }
+
+/* Meldingen: geen icoon, wel de kleur van de soort */
+.oa-login .utrecht-alert { margin: 0; }
+.oa-login .utrecht-alert__message { margin: 0; }
+
+/* Andere manieren van inloggen en informatie onderaan */
+.oa-anders hr { border: 0; border-top: 1px solid var(--utrecht-separator-color, #ccc); margin: 4px 0 10px; }
+.oa-anders h2 { font-size: 0.8125rem; font-weight: 600; margin: 0 0 8px; }
+.oa-anders-lijst { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.oa-info { font-size: 0.8125rem; }
+.oa-keuzelijst { display: flex; flex-direction: column; gap: 8px; }
+.oa-keuzelijst-item { border: 1px solid var(--utrecht-separator-color, #ccc); border-radius: 4px; padding: 10px 12px; }
+
+/* Voet: taalkeuze en de prototype-regel */
+.oa-voet { display: flex; flex-direction: column; gap: 6px; border-top: 1px solid var(--utrecht-separator-color, #ccc); padding-top: 10px; color: var(--utrecht-paragraph-small-color, #555); }
+.oa-talen { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 0.8125rem; }
+.oa-talen [aria-current] { font-weight: 600; }

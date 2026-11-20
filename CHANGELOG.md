@@ -1,5 +1,13 @@
 # Wijzigingen
 
+## 0.29.0 — 2026-11-20
+
+**Een inlogscherm in de stijl van de panelen.** Keycloak krijgt het thema `oa` (map `keycloak-thema/`): dezelfde kop, Utrecht-componenten en het voorbeeldthema van NL Design System als de panelen, passend in een zijbalk van ongeveer 380 pixels en als kaart in een gewone browser. Het geldt voor alle pagina's van het inloggen: inloggen, wachtwoord bijwerken, foutmeldingen. Het scherm opent in het Nederlands (oa-integratielaag 0.12.0 geeft `ui_locales` mee); Engels blijft te kiezen.
+
+- `vps3-diensten.yml` koppelt het thema alleen-lezen in Keycloak; de realm-import zet het voor een nieuwe server.
+- `bijwerken.sh` op VPS 3 zet het thema op het bestaande realm en herstart Keycloak als er iets in `keycloak-thema/` veranderde. `OA_LOGIN_THEMA=keycloak.v2` in `.env` zet het standaardscherm terug.
+- Uitrollen: `bijwerken.sh` op VPS 3 (Keycloak herstart, inloggen kan dan een halve minuut niet) en VPS 1 (integratielaag). Geen migratie.
+
 ## 0.28.1 — 2026-11-20
 
 De lockfile van de werkplaats past bij oa-paneel 0.19.1: de keuze Zakelijk / Persoonlijk staat weer naast elkaar. Uitrollen: `bijwerken.sh` op VPS 1 (toegang). Geen migratie.

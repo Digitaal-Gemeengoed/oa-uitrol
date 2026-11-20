@@ -1,6 +1,7 @@
 {
   "realm": "gemeenten",
   "displayName": "Office Assistent — prototype",
+  "loginTheme": "oa",
   "enabled": true,
   "sslRequired": "external",
   "loginWithEmailAllowed": true,

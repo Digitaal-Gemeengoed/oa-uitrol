@@ -87,6 +87,8 @@ services:
       OA_TESTWACHTWOORD: ${OA_TESTWACHTWOORD:?}
     volumes:
       - ./keycloak:/opt/keycloak/data/import:ro
+      # Inlogthema in de stijl van de OA-panelen (keycloak-thema/README.md).
+      - ./keycloak-thema/oa:/opt/keycloak/themes/oa:ro
     ports:
       - "${PRIVAAT_ADRES}:8080:8080"
     depends_on:
