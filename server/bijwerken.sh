@@ -16,6 +16,17 @@ COMPOSE="$(compose_bestand "$ROL")"
 
 meld "Bijwerken op $(vps_naam "$ROL")"
 if [ -z "${OA_BIJGEWERKT:-}" ]; then
+  # De repo's staan sinds 2026-11-20 in de organisatie Digitaal-Gemeengoed.
+  # GitHub stuurt het oude adres door, maar zet de remote liever goed.
+  for MAP in "$OA_UITROL" "$GEMEENSCHAP_MAP"; do
+    [ -d "$MAP/.git" ] || continue
+    OUD="$(git -C "$MAP" remote get-url origin 2>/dev/null || true)"
+    case "$OUD" in
+      *github.com/digitaalgemeengoed/*)
+        git -C "$MAP" remote set-url origin "${OUD/github.com\/digitaalgemeengoed\//github.com/Digitaal-Gemeengoed/}"
+        ok "Remote van $MAP naar Digitaal-Gemeengoed" ;;
+    esac
+  done
   git pull --ff-only --quiet || stop "oa-uitrol ophalen van GitHub lukte niet. Controleer de internetverbinding en probeer opnieuw."
   # Opnieuw starten met de nieuwe scripts: dit script en lib.sh zijn al
   # ingelezen in de oude versie, en die kent nieuwe instellingen nog niet.

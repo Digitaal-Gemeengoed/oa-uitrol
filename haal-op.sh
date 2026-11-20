@@ -3,10 +3,10 @@
 # zet daar de workspace neer die ze lokaal aan elkaar koppelt.
 #
 # Gebruik: ./haal-op.sh [github-account] [branch]
-#   standaard: ./haal-op.sh digitaalgemeengoed main
+#   standaard: ./haal-op.sh Digitaal-Gemeengoed main
 set -eu
 
-ACCOUNT="${1:-digitaalgemeengoed}"
+ACCOUNT="${1:-Digitaal-Gemeengoed}"
 TAK="${2:-main}"
 HIER="$(cd "$(dirname "$0")" && pwd)"
 BRON="$HIER/bron"

@@ -16,7 +16,7 @@ ROLLEN=(toegang platform diensten)
 # eigen repo, in /opt/gemeenschap; oa-uitrol zorgt alleen voor de basis.
 GEMEENSCHAP_MAP="${GEMEENSCHAP_MAP:-/opt/gemeenschap}"
 # shellcheck disable=SC2034
-GEMEENSCHAP_REPO="https://github.com/digitaalgemeengoed/gemeenschap"
+GEMEENSCHAP_REPO="https://github.com/Digitaal-Gemeengoed/gemeenschap"
 
 meld()     { printf '\n\033[1;34m==> %s\033[0m\n' "$*"; }
 ok()       { printf '  \033[32m✓\033[0m %s\n' "$*"; }

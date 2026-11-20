@@ -1,5 +1,12 @@
 # Wijzigingen
 
+## 0.27.1 — 2026-11-20
+
+**De repo's staan nu in de organisatie [Digitaal-Gemeengoed](https://github.com/Digitaal-Gemeengoed).** `haal-op.sh` haalt standaard daar op, het gemeenschapsplatform komt van `Digitaal-Gemeengoed/gemeenschap`, en alle links in de documentatie en de downloadpagina wijzen naar de nieuwe plek.
+
+- `bijwerken.sh` zet de remote van `/opt/oa-uitrol` en `/opt/gemeenschap` om als die nog naar het oude account wijst. Het oude adres werkt via de doorverwijzing van GitHub nog, dus haast is er niet.
+- Uitrollen: `bijwerken.sh` op elke VPS, in willekeurige volgorde. Geen migratie, geen nieuwe containers.
+
 ## 0.27.0 — 2026-11-20
 
 De lockfile van de werkplaats past bij oa-contract 0.12.0, opendop-mini 0.18.0, oa-kern 0.12.3, oa-paneel 0.19.0, oa-adapters 0.20.7, oa-integratielaag 0.11.3 en oa-services 0.6.5: het classificatiemodel reageert op de status van een stuk (eerst classificeren, doorgeven aan de hele zaak of het dossier, klassen per status, attributen verplicht vanaf een status). Geen migratie.
@@ -64,7 +71,7 @@ De lockfile van de werkplaats past bij de nieuwe versies; zonder deze stap breek
 
 ## 0.22.0 — 2026-11-11
 
-**Het gemeenschapsplatform heeft een eigen repo**: [digitaalgemeengoed/gemeenschap](https://github.com/digitaalgemeengoed/gemeenschap). De map `gemeenschap/` en `vps4-gemeenschap.yml` zijn hier weg. Op VPS 4 haalt `server/installeer.sh` die repo op naar `/opt/gemeenschap` en geeft door; daarna rolt de server zelf uit vanuit GitHub: pagina's en menu's (`inhoud/`) na elke samenvoeging op `main`, de rest bij een nieuwe versie-tag. Zie INRICHTING.md, stap 12.
+**Het gemeenschapsplatform heeft een eigen repo**: [Digitaal-Gemeengoed/gemeenschap](https://github.com/Digitaal-Gemeengoed/gemeenschap). De map `gemeenschap/` en `vps4-gemeenschap.yml` zijn hier weg. Op VPS 4 haalt `server/installeer.sh` die repo op naar `/opt/gemeenschap` en geeft door; daarna rolt de server zelf uit vanuit GitHub: pagina's en menu's (`inhoud/`) na elke samenvoeging op `main`, de rest bij een nieuwe versie-tag. Zie INRICHTING.md, stap 12.
 
 - Op VPS 1 tot 3 verandert niets.
 - Had je 0.21.0 al op een VPS 4 geïnstalleerd? Dat is niet waarschijnlijk; vraag het anders, want `.env` moet dan naar `/opt/gemeenschap`.
@@ -135,7 +142,7 @@ Lockfile bijgewerkt. Samen met 0.16.0 bijwerken: **VPS 3, VPS 2, VPS 1** (in die
 
 ## 0.16.0 — 2026-11-09
 
-**Toegankelijkheid van het bestand zelf:** [oa-wcag](https://github.com/digitaalgemeengoed/oa-wcag) 0.1.0 op VPS 3, naast de assistent-services en alleen voor hen bereikbaar (geen poort naar buiten). 34 controles voor docx, xlsx en pptx; de assistent dekt daarmee 20 WCAG-criteria in plaats van 5 (titel, taal, contrast, tekstafstand, leesvolgorde, alt-tekst van grafieken, tabellen …).
+**Toegankelijkheid van het bestand zelf:** [oa-wcag](https://github.com/Digitaal-Gemeengoed/oa-wcag) 0.1.0 op VPS 3, naast de assistent-services en alleen voor hen bereikbaar (geen poort naar buiten). 34 controles voor docx, xlsx en pptx; de assistent dekt daarmee 20 WCAG-criteria in plaats van 5 (titel, taal, contrast, tekstafstand, leesvolgorde, alt-tekst van grafieken, tabellen …).
 
 - `vps3-diensten.yml`: dienst `wcag` (Java, ongeveer 150 MB, grens 512 MB, alleen-lezen bestandssysteem). `haal-op.sh` haalt oa-wcag op.
 - `WCAG_DIENSTSLEUTEL` in `.env` op VPS 3 mag leeg blijven: dan dezelfde als `DIENSTEN_DIENSTSLEUTEL`.

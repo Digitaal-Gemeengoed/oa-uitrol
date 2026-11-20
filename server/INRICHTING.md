@@ -86,7 +86,7 @@ Plak dan deze drie regels:
 
 ```
 apt-get update && apt-get install -y git
-git clone https://github.com/digitaalgemeengoed/oa-uitrol /opt/oa-uitrol
+git clone https://github.com/Digitaal-Gemeengoed/oa-uitrol /opt/oa-uitrol
 /opt/oa-uitrol/server/inrichten.sh
 ```
 
@@ -272,7 +272,7 @@ dan de Python-ondersteuning van LibreOffice:
 
 ## 9. Het beheerportaal
 
-Op `https://oa-admin.<domein>` beheert de gemeente wie de Office Assistent mag beheren: accounts, groepen met rechten, de audit en instellingen. Het draait op VPS 1, met een eigen database die niet van buiten bereikbaar is. Het ontwerp staat in [`oa-beheer/docs/security.md`](https://github.com/digitaalgemeengoed/oa-beheer/blob/main/docs/security.md).
+Op `https://oa-admin.<domein>` beheert de gemeente wie de Office Assistent mag beheren: accounts, groepen met rechten, de audit en instellingen. Het draait op VPS 1, met een eigen database die niet van buiten bereikbaar is. Het ontwerp staat in [`oa-beheer/docs/security.md`](https://github.com/Digitaal-Gemeengoed/oa-beheer/blob/main/docs/security.md).
 
 Er zijn twee manieren om binnen te komen:
 
@@ -446,7 +446,7 @@ Een script opnieuw draaien kan altijd. Het slaat over wat al klaar is en houdt b
 
 ## 12. Het gemeenschapsplatform (VPS 4)
 
-Het platform voor het netwerk rond de Office Assistent: lid worden, profielen, fora, nieuwsbrief (CiviCRM), meldingen en projecten (Redmine). Het staat op een **eigen VPS** en heeft niets met VPS 1 tot 3 te maken: geen koppelen, geen WireGuard, een eigen Keycloak. De software staat in een eigen repo, [digitaalgemeengoed/gemeenschap](https://github.com/digitaalgemeengoed/gemeenschap); oa-uitrol zorgt alleen voor de basis van de server (stap 3 en 4). Na de installatie **onderhoudt de server zichzelf vanuit die repo**: elke vijf minuten kijkt hij of er iets nieuws is.
+Het platform voor het netwerk rond de Office Assistent: lid worden, profielen, fora, nieuwsbrief (CiviCRM), meldingen en projecten (Redmine). Het staat op een **eigen VPS** en heeft niets met VPS 1 tot 3 te maken: geen koppelen, geen WireGuard, een eigen Keycloak. De software staat in een eigen repo, [Digitaal-Gemeengoed/gemeenschap](https://github.com/Digitaal-Gemeengoed/gemeenschap); oa-uitrol zorgt alleen voor de basis van de server (stap 3 en 4). Na de installatie **onderhoudt de server zichzelf vanuit die repo**: elke vijf minuten kijkt hij of er iets nieuws is.
 
 **Server:** 4 vCPU, 8 GB geheugen, 100 GB schijf is ruim genoeg voor honderden leden.
 

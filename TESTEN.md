@@ -52,4 +52,4 @@ Op Windows is de WebView2 Runtime nodig. Die zit in Windows 11 en een bijgewerkt
 - Bij LibreOffice: het **logboek** (Office Assistent → Logboek openen). Het bevat geen documentinhoud en geen sleutels, alleen wat de extensie deed en wat er misging.
 - Bij Office in de browser: eventuele foutmeldingen in de console van de browser (F12 → Console).
 
-Stuur het naar de beheerder van de omgeving, of maak een issue in [digitaalgemeengoed/oa-adapters](https://github.com/digitaalgemeengoed/oa-adapters/issues) met in de titel de werkomgeving en het systeem (bijvoorbeeld "LibreOffice 24.8 · Windows 11 · webpaneel zichtbaar, typen gaat naar document").
+Stuur het naar de beheerder van de omgeving, of maak een issue in [Digitaal-Gemeengoed/oa-adapters](https://github.com/Digitaal-Gemeengoed/oa-adapters/issues) met in de titel de werkomgeving en het systeem (bijvoorbeeld "LibreOffice 24.8 · Windows 11 · webpaneel zichtbaar, typen gaat naar document").
