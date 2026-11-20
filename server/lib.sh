@@ -176,6 +176,12 @@ sudo_zonder_wachtwoord() {
   rm -f "$tijdelijk"
 }
 
+# SHA-256 van een bestand, of "geen" als het er (nog) niet is. Veilig onder
+# set -euo pipefail: een ontbrekend bestand stopt het script niet.
+controlesom() {
+  if [ -f "$1" ]; then sha256sum "$1" | cut -c1-64; else echo geen; fi
+}
+
 # Huisstijl van deze inrichting (VPS 1 en VPS 3): OA_HUISSTIJL in .env, een
 # naam uit huisstijl/catalogus.txt (standaard voorbeeld). Haalt het pakket van
 # npm, controleert de integriteit die npm opgeeft, en zet de CSS in

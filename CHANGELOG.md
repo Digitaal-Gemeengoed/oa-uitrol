@@ -1,5 +1,11 @@
 # Wijzigingen
 
+## 0.30.1 — 2026-11-20
+
+- **Herstel:** `bijwerken.sh` stopte zonder melding direct na "oa-uitrol …" op VPS 1 en VPS 3, zolang er nog geen huisstijl was opgehaald. De controlesom van het ontbrekende `huisstijl/huisstijl.css` mislukte, en onder `set -o pipefail` stopt het script dan. Nu geeft `controlesom` voor een ontbrekend bestand "geen".
+- Getest door het hele script voor VPS 1 en VPS 3 te draaien onder dezelfde instellingen als op de server, vanaf een lege huisstijl en een tweede keer zonder wijzigingen (dan herstart Keycloak niet).
+- Uitrollen: `bijwerken.sh` op VPS 3, dan VPS 1. Geen migratie.
+
 ## 0.30.0 — 2026-11-20
 
 **Een huisstijl per inrichting.** Met `OA_HUISSTIJL` in `.env` (op VPS 1 en VPS 3) kiest een inrichting de huisstijl van het inlogscherm en van het paneel vóór het inloggen, bijvoorbeeld `haarlem`. Standaard blijft het voorbeeldthema van NL Design System.

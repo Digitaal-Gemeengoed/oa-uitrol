@@ -43,9 +43,9 @@ if [ "$ROL" = gemeenschap ]; then
   exit 0
 fi
 [ "$ROL" = toegang ] && vul_toegang_aan .env
-HUISSTIJL_VOOR="$(sha256sum huisstijl/huisstijl.css 2>/dev/null | cut -c1-64)"
+HUISSTIJL_VOOR="$(controlesom huisstijl/huisstijl.css)"
 case "$ROL" in toegang|diensten) huisstijl_bijwerken ;; esac
-HUISSTIJL_NU="$(sha256sum huisstijl/huisstijl.css 2>/dev/null | cut -c1-64)"
+HUISSTIJL_NU="$(controlesom huisstijl/huisstijl.css)"
 ./haal-op.sh >/dev/null || stop "De broncode ophalen van GitHub lukte niet. Er is niets veranderd; probeer het straks opnieuw."
 ok "Broncode opgehaald"
 # Alleen images van buiten ophalen; wat hier gebouwd wordt, slaat pull over.
