@@ -4,7 +4,7 @@
 
 > Een prototype, geen product. Alleen testgegevens.
 
-**Startpagina met uitleg, architectuur en techniek: [digitaalgemeengoed.github.io](https://digitaalgemeengoed.github.io/)**
+**Startpagina met uitleg, architectuur en techniek: [digitaal-gemeengoed.github.io](https://digitaal-gemeengoed.github.io/)**
 
 ## Begin hier
 
