@@ -43,6 +43,9 @@ if [ "$ROL" = gemeenschap ]; then
   exit 0
 fi
 [ "$ROL" = toegang ] && vul_toegang_aan .env
+HUISSTIJL_VOOR="$(sha256sum huisstijl/huisstijl.css 2>/dev/null | cut -c1-64)"
+case "$ROL" in toegang|diensten) huisstijl_bijwerken ;; esac
+HUISSTIJL_NU="$(sha256sum huisstijl/huisstijl.css 2>/dev/null | cut -c1-64)"
 ./haal-op.sh >/dev/null || stop "De broncode ophalen van GitHub lukte niet. Er is niets veranderd; probeer het straks opnieuw."
 ok "Broncode opgehaald"
 # Alleen images van buiten ophalen; wat hier gebouwd wordt, slaat pull over.
@@ -64,7 +67,8 @@ if [ "$ROL" = toegang ]; then
 fi
 if [ "$ROL" = diensten ]; then
   THEMA_NU="$(git rev-parse -q --verify HEAD:keycloak-thema 2>/dev/null || echo geen)"
-  keycloak_thema "$COMPOSE" "$([ "${OA_THEMA_VOOR:-geen}" != "$THEMA_NU" ] && echo ja || echo nee)"
+  # Keycloak houdt thema en huisstijl in het geheugen: herstarten na een wijziging.
+  keycloak_thema "$COMPOSE" "$([ "${OA_THEMA_VOOR:-geen}" != "$THEMA_NU" ] || [ "$HUISSTIJL_VOOR" != "$HUISSTIJL_NU" ] && echo ja || echo nee)"
 fi
 docker image prune -f >/dev/null
 ok "Bijgewerkt"

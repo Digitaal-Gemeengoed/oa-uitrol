@@ -147,6 +147,9 @@ if [ "$ROL" = platform ] && ! grep -qE '^OPENBAO_TOKEN=.+' .env; then
   done
 fi
 
+# --- Huisstijl (inlogscherm en paneel) --------------------------------------
+case "$ROL" in toegang|diensten) huisstijl_bijwerken ;; esac
+
 # --- Broncode en images -----------------------------------------------------
 meld "Broncode ophalen en bouwen (de eerste keer 5 tot 15 minuten)"
 git -C "$OA_UITROL" pull --ff-only --quiet || waarschuw "oa-uitrol kon niet worden bijgewerkt; ik ga verder met deze versie"

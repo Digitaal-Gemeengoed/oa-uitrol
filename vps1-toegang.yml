@@ -67,8 +67,12 @@ services:
       COLLABORA_INTERN: ${COLLABORA_INTERN:-}
       COLLABORA_WOPI_BASIS: http://integratielaag:3000
       WERKBESTANDEN_MAP: /data/werkbestanden
+      # Huisstijl van deze inrichting (OA_HUISSTIJL; huisstijl/catalogus.txt).
+      OA_HUISSTIJL_KLASSE: ${OA_HUISSTIJL_KLASSE:-voorbeeld-theme}
+      OA_HUISSTIJL_CSS: /app/huisstijl/huisstijl.css
     volumes:
       - werkbestanden:/data/werkbestanden
+      - ./huisstijl:/app/huisstijl:ro
 
   # Collabora Online Development Edition: LibreOffice in de browser, als derde
   # werkomgeving. Opent werkbestanden via WOPI bij de integratielaag (intern,

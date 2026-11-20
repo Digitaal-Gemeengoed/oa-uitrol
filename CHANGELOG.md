@@ -1,5 +1,15 @@
 # Wijzigingen
 
+## 0.30.0 — 2026-11-20
+
+**Een huisstijl per inrichting.** Met `OA_HUISSTIJL` in `.env` (op VPS 1 en VPS 3) kiest een inrichting de huisstijl van het inlogscherm en van het paneel vóór het inloggen, bijvoorbeeld `haarlem`. Standaard blijft het voorbeeldthema van NL Design System.
+
+- `huisstijl/catalogus.txt` noemt per huisstijl het design-tokens-pakket van NL Design System, de versie, het CSS-bestand en de klasse. Een gemeente toevoegen is één regel.
+- De server haalt het pakket zelf van npm, controleert de integriteit die npm opgeeft, en zet de CSS in `huisstijl/huisstijl.css`. Die staat niet in git: de huisstijl van een gemeente is van die gemeente. Lukt het ophalen niet, of klopt het pakket niet, dan blijft de vorige huisstijl staan.
+- Keycloak (VPS 3) en de integratielaag (VPS 1) krijgen de huisstijl aangekoppeld; Keycloak herstart als die verandert.
+- oa-paneel 0.20.0, oa-adapters 0.20.8 en oa-integratielaag 0.13.0.
+- Uitrollen: `bijwerken.sh` op VPS 3 en VPS 1. Geen migratie. Wil je een andere huisstijl: eerst `OA_HUISSTIJL=...` in `.env` op beide, dan `bijwerken.sh`.
+
 ## 0.29.0 — 2026-11-20
 
 **Een inlogscherm in de stijl van de panelen.** Keycloak krijgt het thema `oa` (map `keycloak-thema/`): dezelfde kop, Utrecht-componenten en het voorbeeldthema van NL Design System als de panelen, passend in een zijbalk van ongeveer 380 pixels en als kaart in een gewone browser. Het geldt voor alle pagina's van het inloggen: inloggen, wachtwoord bijwerken, foutmeldingen. Het scherm opent in het Nederlands (oa-integratielaag 0.12.0 geeft `ui_locales` mee); Engels blijft te kiezen.

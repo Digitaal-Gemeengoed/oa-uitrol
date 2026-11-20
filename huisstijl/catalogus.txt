@@ -1,0 +1,13 @@
+# Huisstijlen voor het inlogscherm en het paneel (vóór het inloggen).
+# Kies er één met OA_HUISSTIJL in .env op VPS 1 en VPS 3; standaard voorbeeld.
+# De server haalt het pakket zelf op van npm (met controle van de integriteit)
+# en zet de CSS in huisstijl/huisstijl.css. Die staat niet in git: de huisstijl
+# van een gemeente is van die gemeente (zie de licentie van het pakket).
+#
+# Een gemeente toevoegen: één regel, met het design-tokens-pakket van de
+# gemeente uit NL Design System, de versie, het CSS-bestand in het pakket en
+# de klasse waaronder de tokens staan.
+#
+# naam       klasse            pakket                                              versie   bestand
+voorbeeld    voorbeeld-theme   @nl-design-system-unstable/voorbeeld-design-tokens  14.2.0   dist/theme.css
+haarlem      haarlem-theme     @nl-design-system-unstable/haarlem-design-tokens    1.0.0    dist/index.css

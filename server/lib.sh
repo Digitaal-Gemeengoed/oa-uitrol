@@ -176,6 +176,50 @@ sudo_zonder_wachtwoord() {
   rm -f "$tijdelijk"
 }
 
+# Huisstijl van deze inrichting (VPS 1 en VPS 3): OA_HUISSTIJL in .env, een
+# naam uit huisstijl/catalogus.txt (standaard voorbeeld). Haalt het pakket van
+# npm, controleert de integriteit die npm opgeeft, en zet de CSS in
+# huisstijl/huisstijl.css en de klasse in OA_HUISSTIJL_KLASSE. Doet niets als
+# die versie er al staat. Mislukt het ophalen, dan blijft de vorige staan.
+HUISSTIJL_NPM="${HUISSTIJL_NPM:-https://registry.npmjs.org}"
+huisstijl_bijwerken() {
+  local env="$OA_UITROL/.env" map="$OA_UITROL/huisstijl" naam regel klasse pakket versie bestand kop meta tarball integriteit werk som
+  naam="$(sed -n 's/^OA_HUISSTIJL=//p' "$env" | tail -1)"; naam="${naam:-voorbeeld}"
+  regel="$(awk -v n="$naam" '$1 == n { print; exit }' "$map/catalogus.txt")"
+  if [ -z "$regel" ]; then
+    waarschuw "Huisstijl $naam staat niet in huisstijl/catalogus.txt; ik gebruik voorbeeld."
+    naam=voorbeeld; regel="$(awk '$1 == "voorbeeld" { print; exit }' "$map/catalogus.txt")"
+  fi
+  read -r _ klasse pakket versie bestand <<<"$regel"
+  kop="/* huisstijl $naam: $pakket@$versie $bestand */"
+  if [ ! -f "$map/huisstijl.css" ] || [ "$(head -n 1 "$map/huisstijl.css")" != "$kop" ]; then
+    command -v jq >/dev/null || apt-get install -y -qq jq >/dev/null
+    werk="$(mktemp -d)"
+    if meta="$(curl -fsS --max-time 30 "$HUISSTIJL_NPM/$pakket/$versie")" \
+       && tarball="$(jq -r '.dist.tarball // empty' <<<"$meta")" && integriteit="$(jq -r '.dist.integrity // empty' <<<"$meta")" \
+       && [ -n "$tarball" ] && [[ "$integriteit" == sha512-* ]] \
+       && curl -fsS --max-time 60 -o "$werk/pakket.tgz" "$tarball"; then
+      som="sha512-$(openssl dgst -sha512 -binary "$werk/pakket.tgz" | base64 -w0)"
+      if [ "$som" != "$integriteit" ]; then
+        waarschuw "Huisstijl $naam: het pakket klopt niet met de controlesom van npm. Niets gewijzigd."
+      elif tar -xzf "$werk/pakket.tgz" -C "$werk" "package/$bestand" 2>/dev/null; then
+        { echo "$kop"; cat "$werk/package/$bestand"; } > "$werk/huisstijl.css"
+        install -m 0644 "$werk/huisstijl.css" "$map/huisstijl.css"
+        ok "Huisstijl $naam opgehaald ($pakket@$versie)"
+      else
+        waarschuw "Huisstijl $naam: $bestand staat niet in $pakket@$versie. Niets gewijzigd."
+      fi
+    else
+      waarschuw "Huisstijl $naam ophalen van npm lukte niet. De vorige huisstijl blijft staan."
+    fi
+    rm -rf "$werk"
+  fi
+  # De klasse alleen aanpassen als de CSS die erbij hoort er ook echt staat.
+  if [ "$(head -n 1 "$map/huisstijl.css" 2>/dev/null)" = "$kop" ]; then
+    [ "$(sed -n 's/^OA_HUISSTIJL_KLASSE=//p' "$env" | tail -1)" = "$klasse" ] || zet_env "$env" OA_HUISSTIJL_KLASSE "$klasse"
+  fi
+}
+
 # Inlogthema van Keycloak (VPS 3). Keycloak houdt thema's in het geheugen, dus
 # na een wijziging in keycloak-thema/ eerst herstarten (tweede argument "ja").
 # Daarna het thema op het realm zetten: de realm-import doet dat alleen bij

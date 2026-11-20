@@ -85,10 +85,13 @@ services:
       # Eerste wachtwoord van de testgebruikers; tijdelijk, bij de eerste
       # inlog kies je een eigen wachtwoord. installeer.sh maakt het willekeurig.
       OA_TESTWACHTWOORD: ${OA_TESTWACHTWOORD:?}
+      # Huisstijl van het inlogscherm (OA_HUISSTIJL; huisstijl/catalogus.txt).
+      OA_HUISSTIJL_KLASSE: ${OA_HUISSTIJL_KLASSE:-voorbeeld-theme}
     volumes:
       - ./keycloak:/opt/keycloak/data/import:ro
       # Inlogthema in de stijl van de OA-panelen (keycloak-thema/README.md).
       - ./keycloak-thema/oa:/opt/keycloak/themes/oa:ro
+      - ./huisstijl:/opt/keycloak/themes/oa/login/resources/huisstijl:ro
     ports:
       - "${PRIVAAT_ADRES}:8080:8080"
     depends_on:
