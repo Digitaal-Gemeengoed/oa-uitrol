@@ -10,6 +10,7 @@
 
 | Je wilt … | Lees |
 |---|---|
+| **alle documentatie** op één plek, of eerst begrijpen wat de assistent is | [docs/](docs/README.md), met de [architectuur](docs/architectuur.md) en de ontwerpen |
 | de assistent **uitproberen** op een omgeving die al draait | [TESTEN.md](TESTEN.md) en de downloadpagina van die omgeving (`https://office.<domein>`) |
 | een eigen omgeving **inrichten** op drie VPS'en | [server/INRICHTING.md](server/INRICHTING.md): stap voor stap, ook voor wie geen systeembeheerder is |
 | **ontwikkelen** op je eigen computer | [Op één machine](#op-één-machine) hieronder, en de README van de repository waar je aan werkt |
