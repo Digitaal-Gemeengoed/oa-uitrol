@@ -1,5 +1,9 @@
 # Wijzigingen
 
+## 0.28.1 — 2026-11-20
+
+De lockfile van de werkplaats past bij oa-paneel 0.19.1: de keuze Zakelijk / Persoonlijk staat weer naast elkaar. Uitrollen: `bijwerken.sh` op VPS 1 (toegang). Geen migratie.
+
 ## 0.28.0 — 2026-11-20
 
 **Bijwerken zonder wachtwoord.** `beheer` mag `sudo /opt/oa-uitrol/server/bijwerken.sh` starten zonder het sudo-wachtwoord; op VPS 4 geldt dat ook voor `uitrol.sh` en `bijwerken.sh` van het gemeenschapsplatform. Voor elk ander commando blijft sudo om het wachtwoord vragen.
