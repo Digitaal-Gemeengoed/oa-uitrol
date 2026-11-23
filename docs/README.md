@@ -17,7 +17,7 @@ Alles over het prototype van de Office Assistent van Digitaal GemeenGoed op éé
 
 ## Architectuur en ontwerpen
 
-- [Architectuur werkend prototype](architectuur.md): doel, uitgangspunten, bouwblokken, technologiekeuzes, uitrol, inrichting per gemeente en alle besluiten (OA-ADR-001 tot en met 012).
+- [Architectuur werkend prototype](architectuur.md): doel, uitgangspunten, bouwblokken, technologiekeuzes, uitrol, inrichting per gemeente en alle besluiten (OA-ADR-001 tot en met 013).
 - [Meer gemeenten in één inrichting](multi-tenant.md): een gemeente aansluiten, de gemeente uit het e-maildomein (Keycloak Organizations), beheer per gemeente en GR-breed.
 - Ontwerpen per onderdeel, met de besluiten en de stand van zaken:
   - [Metadatamodel per gemeente](ontwerp/metadatamodel.md)
@@ -25,6 +25,7 @@ Alles over het prototype van de Office Assistent van Digitaal GemeenGoed op éé
   - [Anonimiseren in het document](ontwerp/anonimiseren-in-het-document.md)
   - [Kwaliteit van het anonimiseren](ontwerp/kwaliteit-anonimiseren.md)
   - [Documenteigenschappen en de titel](ontwerp/documenteigenschappen.md)
+  - [Archiefregeling 2026: openbaarheid, taak, werkomgeving, integriteit en PDF/A](ontwerp/archiefregeling-2026.md)
 
 De ontwerpen noemen de versies waarin ze zijn gebouwd. Wat daarna veranderde, staat in de changelogs van de repositories.
 

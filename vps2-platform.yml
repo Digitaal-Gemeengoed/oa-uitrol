@@ -4,6 +4,7 @@
 #
 #   docker compose -f vps2-platform.yml --env-file .env up -d
 #   met zoekindex:  COMPOSE_PROFILES=zoeken en ZOEKINDEX=opensearch in .env
+#   met PDF/A:      COMPOSE_PROFILES=omzetten en OMZETTER_URL=http://omzetter:3000 (standaard aan)
 
 name: oa-platform
 
@@ -19,6 +20,10 @@ x-platform-omgeving: &platform-omgeving
   OPENBAO_TOKEN: ${OPENBAO_TOKEN:-}
   ZOEKINDEX: ${ZOEKINDEX:-uit}
   OPENSEARCH_ADRES: http://zoekindex:9200
+  # Archiefregeling 2026, art. 2.9: elke versie ook als PDF/A-2b (met PDF/UA). Leeg = uit.
+  OMZETTER_URL: ${OMZETTER_URL:-}
+  # Art. 2.8: integriteitscontrole; elke versie eens per zoveel dagen.
+  INTEGRITEIT_DAGEN: ${INTEGRITEIT_DAGEN:-30}
 
 services:
   postgres:
@@ -66,6 +71,22 @@ services:
       nofile: { soft: 65536, hard: 65536 }
     volumes:
       - zoekdata:/usr/share/opensearch/data
+
+  # Omzetten naar PDF/A met LibreOffice en Chromium (Gotenberg). Alleen voor
+  # de worker; geen poort naar buiten. Chromium mag niets van het netwerk halen:
+  # alleen de aangeleverde bestanden.
+  omzetter:
+    image: gotenberg/gotenberg:${GOTENBERG_VERSIE:-8}
+    profiles: ["omzetten"]
+    restart: unless-stopped
+    command:
+      - gotenberg
+      - --api-timeout=180s
+      - --chromium-allow-list=^file:///tmp/.*
+      - --chromium-disable-javascript=true
+      - --webhook-disable=true
+      - --api-disable-download-from=true
+      - --log-level=warn
 
   migreer:
     build: { context: ./bron, dockerfile: ../Dockerfile, target: platform }

@@ -1,5 +1,12 @@
 # Wijzigingen
 
+## 0.33.0 — 2026-11-23
+
+- **Archiefregeling 2026** (Stcrt. 2026, 40895): nieuw ontwerp `docs/ontwerp/archiefregeling-2026.md` en OA-ADR-013. Openbaarheid met grond, duur en einddatum; de taak; werkomgeving en integriteitscontroles bij elke versie; PDF/A-2b met PDF/UA.
+- VPS 2: nieuwe container `omzetter` (Gotenberg 8, profiel `omzetten`, standaard aan; ongeveer 1 GB geheugen). `bijwerken.sh` zet `OMZETTER_URL`, `GOTENBERG_VERSIE` en het profiel in `.env`. Uitzetten: `OMZETTER_URL=` (leeg) en `omzetten` uit `COMPOSE_PROFILES`.
+- Werkplaats: oa-contract 0.15.0, opendop-mini 0.20.0, oa-services 0.7.2, oa-kern 0.15.0, oa-paneel 0.23.0, oa-adapters 0.22.0, oa-integratielaag 0.14.1.
+- Uitrollen: `bijwerken.sh` op VPS 2 (migratie 013 gaat vanzelf, Gotenberg wordt opgehaald), dan VPS 3, dan VPS 1. LibreOffice-extensie 0.18.0 opnieuw installeren. In het beheerportaal: een nieuwe versie van het metadatamodel publiceren om openbaarheid en taak te krijgen.
+
 ## 0.32.0 — 2026-11-23
 
 - **Meer gemeenten in één inrichting.** Nieuw: `docs/multi-tenant.md` en OA-ADR-012. Elke gemeente in `GEMEENTEN` op VPS 3 (met e-maildomeinen) wordt een organisatie in Keycloak; gebruikers worden op hun e-maildomein gekoppeld. `bijwerken.sh` doet dat op VPS 3 bij elke ronde; na een wijziging los: `server/gemeenten.sh`. Een nieuwe gemeente meldt zich daarna vanzelf aan bij het platform.

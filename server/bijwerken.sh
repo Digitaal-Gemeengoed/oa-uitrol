@@ -43,6 +43,7 @@ if [ "$ROL" = gemeenschap ]; then
   exit 0
 fi
 [ "$ROL" = toegang ] && vul_toegang_aan .env
+[ "$ROL" = platform ] && vul_platform_aan .env
 [ "$ROL" = diensten ] && vul_env_aan .env GEMEENTEN "$GEMEENTEN_STANDAARD"
 HUISSTIJL_VOOR="$(controlesom huisstijl/huisstijl.css)"
 case "$ROL" in toegang|diensten) huisstijl_bijwerken ;; esac

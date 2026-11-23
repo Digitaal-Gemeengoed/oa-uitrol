@@ -131,6 +131,7 @@ else
   ok ".env geschreven met nieuwe wachtwoorden"
 fi
 [ "$ROL" = toegang ] && vul_toegang_aan .env
+[ "$ROL" = platform ] && vul_platform_aan .env
 
 # --- Token voor OpenBao (alleen platform) -----------------------------------
 if [ "$ROL" = platform ] && ! grep -qE '^OPENBAO_TOKEN=.+' .env; then

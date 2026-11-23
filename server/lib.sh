@@ -124,6 +124,20 @@ vul_toegang_aan() {
   fi
 }
 
+# Nieuwe instellingen op VPS 2: omzetten naar PDF/A (Archiefregeling 2026, art. 2.9),
+# standaard aan. Uitzetten: OMZETTER_URL= (leeg) en "omzetten" uit COMPOSE_PROFILES.
+vul_platform_aan() {
+  vul_env_aan "$1" GOTENBERG_VERSIE 8
+  if ! grep -q '^OMZETTER_URL=' "$1"; then
+    vul_env_aan "$1" OMZETTER_URL "http://omzetter:3000"
+    if grep -q '^COMPOSE_PROFILES=' "$1"; then
+      grep -q '^COMPOSE_PROFILES=.*omzetten' "$1" || sed -i 's/^COMPOSE_PROFILES=\(.*\)$/COMPOSE_PROFILES=\1,omzetten/; s/^COMPOSE_PROFILES=,/COMPOSE_PROFILES=/' "$1"
+    else
+      vul_env_aan "$1" COMPOSE_PROFILES omzetten
+    fi
+  fi
+}
+
 # Zet KEY=waarde in .env: vervangt een bestaande regel of voegt toe. De waarde
 # komt er letterlijk in; aanhalingstekens moet de aanroeper zelf zetten.
 zet_env() {
