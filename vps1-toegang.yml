@@ -21,6 +21,9 @@ x-beheer-omgeving: &beheer-omgeving
   OIDC_ISSUER: ${BEHEER_OIDC_ISSUER:-}
   OIDC_CLIENT_ID: oa-beheer
   OIDC_CLIENT_SECRET: ${BEHEER_OIDC_SECRET:-}
+  # Keycloak over het private netwerk: de pagina Gemeenten beheert daar de
+  # organisaties (het beheerscherm staat niet open naar buiten).
+  KEYCLOAK_INTERN: ${KEYCLOAK_INTERN:?}
   SMTP_HOST: ${SMTP_HOST:-}
   SMTP_POORT: ${SMTP_POORT:-587}
   SMTP_GEBRUIKER: ${SMTP_GEBRUIKER:-}
@@ -28,8 +31,8 @@ x-beheer-omgeving: &beheer-omgeving
   SMTP_AFZENDER: ${SMTP_AFZENDER:-}
   SMTP_TLS: ${SMTP_TLS:-starttls}
   # Het platform, voor de pagina's Metadatamodel, Classificatie en Anonimiseren.
-  # De gemeenten van de inrichting: BEHEER_GEMEENTEN (zoals GEMEENTEN op VPS 3;
-  # bij een GR meer dan één), anders alleen BEHEER_GEMEENTE (standaard haarlem).
+  # De gemeenten van de inrichting: beheerd op de pagina Gemeenten van het portaal.
+  # BEHEER_GEMEENTEN / BEHEER_GEMEENTE vullen alleen de eerste stand (optioneel).
   PLATFORM_URL: ${PLATFORM_INTERN:?}
   PLATFORM_DIENSTSLEUTEL: ${PLATFORM_DIENSTSLEUTEL:?}
   GEMEENTE: ${BEHEER_GEMEENTE:-haarlem}

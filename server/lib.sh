@@ -298,13 +298,17 @@ gemeenten_lijst() {
   done
 }
 
+# keycloak_gemeenten <compose> [koppelen]
+# Volledig (bijwerken.sh, gemeenten.sh): organisaties aan, scope en mapper,
+# het service-account van het beheerportaal, ontbrekende gemeenten uit
+# GEMEENTEN aanmaken, gebruikers koppelen. "koppelen" (de timer, elk kwartier):
+# alleen gebruikers koppelen, stil als er niets verandert.
+# Keycloak is de bron: een gemeente die al bestaat (ook een die het portaal
+# aanmaakte of wijzigde), wordt niet overschreven vanuit GEMEENTEN.
 keycloak_gemeenten() {
-  local compose="$1" env="$OA_UITROL/.env" R=gemeenten tekst gebruiker wachtwoord binnen=nee
+  local compose="$1" modus="${2:-volledig}" env="$OA_UITROL/.env" R=gemeenten tekst gebruiker wachtwoord binnen=nee
   tekst="$(sed -n 's/^GEMEENTEN=//p' "$env" | tail -1)"
-  if [ -z "$tekst" ]; then
-    waarschuw "Geen GEMEENTEN in .env: de gemeenten in Keycloak blijven zoals ze zijn."
-    return 0
-  fi
+  [ "$modus" = koppelen ] && { ok() { :; }; }
   if [ -n "${OA_KCADM:-}" ]; then
     kcg() { $OA_KCADM "$@"; }
     binnen=ja
@@ -323,6 +327,7 @@ keycloak_gemeenten() {
     return 0
   fi
   command -v jq >/dev/null || apt-get install -y -qq jq >/dev/null
+  if [ "$modus" != koppelen ]; then
 
   # Organisaties aan, en de scope 'organization' (claim met alle gemeenten en hun
   # naam) op de clients van de integratielaag en het beheerportaal.
@@ -348,22 +353,41 @@ keycloak_gemeenten() {
     waarschuw "Keycloak heeft geen scope 'organization'; is dit Keycloak 26 of nieuwer?"
   fi
 
-  # Per gemeente een organisatie met domeinen.
-  local id naam domeinen oid json d
-  declare -A ORG_VAN_DOMEIN=()
-  while IFS=$'\t' read -r id naam domeinen; do
-    json="$(jq -cn --arg n "$naam" --arg a "$id" --arg d "$domeinen" \
-      '{name:$n, alias:$a, enabled:true, attributes:{naam:[$n]}, domains:[($d|split(" ")[]|select(length>0)|{name:., verified:true})]}')"
-    oid="$(kcg get organizations -r $R -q max=1000 2>/dev/null | jq -r --arg a "$id" '.[] | select(.alias==$a) | .id' | head -1)"
-    if [ -z "$oid" ]; then
+  # Het beheerportaal maakt zelf gemeenten aan (pagina Gemeenten): een
+  # service-account op de client oa-beheer met alleen manage-organizations en
+  # view-users, en de scope kc-admin-api (vanaf Keycloak 26.8.2 vereist voor de
+  # beheer-API). Gebruikers koppelen blijft hier, op VPS 3.
+  local beheer adminscope
+  beheer="$(kcg get clients -r $R -q clientId=oa-beheer --fields id 2>/dev/null | jq -r '.[0].id // empty')"
+  if [ -n "$beheer" ]; then
+    kcg update "clients/$beheer" -r $R -s serviceAccountsEnabled=true >/dev/null 2>&1
+    for rol in manage-organizations view-users; do
+      kcg add-roles -r $R --uusername service-account-oa-beheer --cclientid realm-management --rolename "$rol" >/dev/null 2>&1 || true
+    done
+    adminscope="$(kcg get client-scopes -r $R --fields id,name 2>/dev/null | jq -r '.[] | select(.name=="kc-admin-api") | .id')"
+    [ -n "$adminscope" ] && kcg update "clients/$beheer/default-client-scopes/$adminscope" -r $R >/dev/null 2>&1
+    ok "Beheerportaal mag gemeenten aanmaken (service-account: manage-organizations, view-users)"
+  fi
+
+  # Gemeenten uit GEMEENTEN die nog niet bestaan.
+  local id naam domeinen json
+  if [ -n "$tekst" ]; then
+    while IFS=$'\t' read -r id naam domeinen; do
+      kcg get organizations -r $R -q max=1000 2>/dev/null | jq -e --arg a "$id" '.[] | select(.alias==$a)' >/dev/null && continue
+      json="$(jq -cn --arg n "$naam" --arg a "$id" --arg d "$domeinen" \
+        '{name:$n, alias:$a, enabled:true, attributes:{naam:[$n]}, domains:[($d|split(" ")[]|select(length>0)|{name:., verified:true})]}')"
       echo "$json" | kcg create organizations -r $R -f - >/dev/null 2>&1 && ok "Gemeente $id ($naam) aangemaakt in Keycloak" \
-        || { waarschuw "Gemeente $id aanmaken in Keycloak lukte niet (staat een domein al bij een andere gemeente?)."; continue; }
-      oid="$(kcg get organizations -r $R -q max=1000 | jq -r --arg a "$id" '.[] | select(.alias==$a) | .id' | head -1)"
-    else
-      echo "$json" | kcg update "organizations/$oid" -r $R -f - >/dev/null || waarschuw "Gemeente $id bijwerken in Keycloak lukte niet."
-    fi
+        || waarschuw "Gemeente $id aanmaken in Keycloak lukte niet (staat een domein al bij een andere gemeente?)."
+    done < <(gemeenten_lijst "$tekst")
+  fi
+  fi  # einde volledig
+
+  # Welk domein bij welke gemeente hoort: uit Keycloak zelf (ook wat het portaal aanmaakte).
+  local oid d
+  declare -A ORG_VAN_DOMEIN=()
+  while IFS=$'\t' read -r id oid domeinen; do
     for d in $domeinen; do ORG_VAN_DOMEIN[$d]="$id $oid"; done
-  done < <(gemeenten_lijst "$tekst")
+  done < <(kcg get organizations -r $R -q max=1000 -q briefRepresentation=false 2>/dev/null | jq -r '.[] | select(.enabled != false) | [.alias, .id, ([.domains[]?.name] | join(" "))] | @tsv')
 
   # Gebruikers koppelen op hun e-maildomein.
   local eerste=0 blok u uid email dom thuis gekoppeld=0 zonder=0 doel
@@ -385,9 +409,41 @@ keycloak_gemeenten() {
     done < <(echo "$blok" | jq -r '.[] | [.id, (.email // ""), (.attributes.gemeente[0] // "")] | @tsv')
     eerste=$((eerste + 200))
   done
-  ok "Gemeenten in Keycloak bijgewerkt; $gekoppeld gebruiker(s) nieuw gekoppeld op e-maildomein"
-  [ "$zonder" -eq 0 ] || waarschuw "$zonder gebruiker(s) horen nog bij geen gemeente: hun e-maildomein staat niet in GEMEENTEN."
+  if [ "$modus" = koppelen ]; then
+    [ "$gekoppeld" -eq 0 ] || echo "gemeenten: $gekoppeld gebruiker(s) gekoppeld op e-maildomein"
+  else
+    ok "Gemeenten in Keycloak bijgewerkt; $gekoppeld gebruiker(s) nieuw gekoppeld op e-maildomein"
+    [ "$zonder" -eq 0 ] || waarschuw "$zonder gebruiker(s) horen nog bij geen gemeente: hun e-maildomein hoort bij geen gemeente."
+  fi
   [ -n "${OA_KCADM:-}" ] || docker compose -f "$compose" --env-file "$env" exec -T keycloak rm -f /tmp/oa-kcadm-g.config >/dev/null 2>&1 || true
+}
+
+# Elk kwartier gebruikers op hun e-maildomein koppelen (VPS 3), zodat een gemeente
+# die het beheerportaal aanmaakt, binnen een kwartier werkt.
+gemeenten_timer() {
+  cat > /etc/systemd/system/oa-gemeenten.service <<EOT
+[Unit]
+Description=Office Assistent: gebruikers op e-maildomein aan hun gemeente koppelen
+After=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=$OA_UITROL/server/gemeenten.sh --koppelen
+EOT
+  cat > /etc/systemd/system/oa-gemeenten.timer <<'EOT'
+[Unit]
+Description=Office Assistent: gemeenten koppelen, elk kwartier
+
+[Timer]
+OnBootSec=5min
+OnUnitActiveSec=15min
+
+[Install]
+WantedBy=timers.target
+EOT
+  systemctl daemon-reload
+  systemctl enable --now oa-gemeenten.timer >/dev/null 2>&1 && ok "Gemeenten koppelen elk kwartier (oa-gemeenten.timer)" \
+    || waarschuw "De timer oa-gemeenten kon niet aan; kijk met: systemctl status oa-gemeenten.timer"
 }
 
 geldig_domein() { [[ "$1" =~ ^([a-z0-9]([a-z0-9-]*[a-z0-9])?\.)+[a-z]{2,}$ ]]; }

@@ -72,6 +72,7 @@ if [ "$ROL" = diensten ]; then
   # Keycloak houdt thema en huisstijl in het geheugen: herstarten na een wijziging.
   keycloak_thema "$COMPOSE" "$([ "${OA_THEMA_VOOR:-geen}" != "$THEMA_NU" ] || [ "$HUISSTIJL_VOOR" != "$HUISSTIJL_NU" ] && echo ja || echo nee)"
   keycloak_gemeenten "$COMPOSE"
+  gemeenten_timer
 fi
 docker image prune -f >/dev/null
 ok "Bijgewerkt"

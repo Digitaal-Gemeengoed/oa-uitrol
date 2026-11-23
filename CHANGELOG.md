@@ -1,5 +1,12 @@
 # Wijzigingen
 
+## 0.34.0 — 2026-11-23
+
+- **Gemeenten beheren in het portaal.** `docs/multi-tenant.md` bijgewerkt: Keycloak is de bron voor gemeenten en domeinen; een GR-brede beheerder met het recht *Gemeenten beheren* voegt gemeenten toe op de pagina Gemeenten (oa-beheer 0.18.0).
+- VPS 3: `keycloak_gemeenten` geeft de client `oa-beheer` een service-account (`manage-organizations`, `view-users`, client scope `kc-admin-api`) en maakt gemeenten uit `GEMEENTEN` alleen nog aan als ze ontbreken. Nieuwe timer `oa-gemeenten.timer` koppelt elk kwartier gebruikers aan hun gemeente (`gemeenten.sh --koppelen`).
+- VPS 1: het portaal krijgt `KEYCLOAK_INTERN` (het beheerscherm van Keycloak blijft dicht naar buiten). `BEHEER_GEMEENTEN` is nu optioneel: alleen de beginstand.
+- Uitrollen: `bijwerken.sh` op VPS 3 (service-account, timer), dan VPS 1 (migratie 007 van het portaal gaat vanzelf). Geef daarna de groep van de superbeheerders in het portaal het recht *Gemeenten beheren*.
+
 ## 0.33.0 — 2026-11-23
 
 - **Archiefregeling 2026** (Stcrt. 2026, 40895): nieuw ontwerp `docs/ontwerp/archiefregeling-2026.md` en OA-ADR-013. Openbaarheid met grond, duur en einddatum; de taak; werkomgeving en integriteitscontroles bij elke versie; PDF/A-2b met PDF/UA.
