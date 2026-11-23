@@ -123,6 +123,7 @@ else
         echo "OA_TESTWACHTWOORD=Test-$(geheim 6)"
         echo "COMPOSE_PROFILES=sleutels"
         echo "OPENBAO_VERSIE=2.7.2"
+        echo "GEMEENTEN=$GEMEENTEN_STANDAARD"
         ;;
     esac
   } > .env
@@ -198,6 +199,7 @@ EOF
     KC_BEHEERDER="$(sed -n 's/^KC_BEHEERDER=//p' .env)"
     KC_BEHEERDER_WACHTWOORD="$(sed -n 's/^KC_BEHEERDER_WACHTWOORD=//p' .env)"
     OA_TESTWACHTWOORD="$(sed -n 's/^OA_TESTWACHTWOORD=//p' .env)"
+    keycloak_gemeenten "$COMPOSE"
     cat <<EOF
 
   Keycloak-beheer (via de SSH-tunnel, zie INRICHTING.md):

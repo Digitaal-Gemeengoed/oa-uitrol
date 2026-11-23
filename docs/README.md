@@ -17,7 +17,8 @@ Alles over het prototype van de Office Assistent van Digitaal GemeenGoed op éé
 
 ## Architectuur en ontwerpen
 
-- [Architectuur werkend prototype](architectuur.md): doel, uitgangspunten, bouwblokken, technologiekeuzes, uitrol, inrichting per gemeente en alle besluiten (OA-ADR-001 tot en met 011).
+- [Architectuur werkend prototype](architectuur.md): doel, uitgangspunten, bouwblokken, technologiekeuzes, uitrol, inrichting per gemeente en alle besluiten (OA-ADR-001 tot en met 012).
+- [Meer gemeenten in één inrichting](multi-tenant.md): een gemeente aansluiten, de gemeente uit het e-maildomein (Keycloak Organizations), beheer per gemeente en GR-breed.
 - Ontwerpen per onderdeel, met de besluiten en de stand van zaken:
   - [Metadatamodel per gemeente](ontwerp/metadatamodel.md)
   - [Classificeren, bewaren en vergrendelen](ontwerp/classificeren-en-vergrendelen.md)

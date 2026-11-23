@@ -74,7 +74,7 @@ Keycloak 26 draait op VPS 3 (realm `gemeenten`, uit `keycloak/realm-gemeenten.js
 
 - De integratielaag is de client `oa-integratielaag`: authorization code flow met PKCE, als vertrouwelijke client. Tokens blijven op de server; de browser krijgt een httpOnly-sessiecookie. Platform en diensten krijgen de identiteit van de integratielaag, met een dienstsleutel.
 - Het beheerportaal is de client `oa-beheer` en eist een tweede factor (`server/keycloak-beheer.sh` richt dat in).
-- Per medewerker: het attribuut `gemeente` (bijvoorbeeld `haarlem`; die gemeente moet ook in `GEMEENTEN` op VPS 2 staan), de rol `medewerker` (of `beheerder`) en een niveau voor persoonsgegevens `ppl-1`, `ppl-2` of `ppl-3`.
+- De gemeente volgt uit het e-maildomein: elke gemeente in `GEMEENTEN` op VPS 3 is een organisatie in Keycloak met haar domeinen, en `bijwerken.sh` (of `gemeenten.sh`) koppelt de gebruikers (zie [docs/multi-tenant.md](docs/multi-tenant.md)). Verder per medewerker de rol `medewerker` (of `beheerder`) en een niveau voor persoonsgegevens `ppl-1`, `ppl-2` of `ppl-3`.
 - `keycloak-beheer.sh` zet de blokkade na tien foute wachtwoorden aan en laat nieuwe eigen gebruikers bij de eerste inlog een authenticator-app koppelen.
 - Het inlogscherm heeft de stijl van de panelen (thema `oa`, zie [keycloak-thema/README.md](keycloak-thema/README.md)) en de huisstijl van de inrichting (`OA_HUISSTIJL`, zie [huisstijl/README.md](huisstijl/README.md)).
 

@@ -257,6 +257,125 @@ keycloak_thema() {
   docker compose -f "$compose" --env-file "$env" exec -T keycloak rm -f /tmp/oa-kcadm.config >/dev/null 2>&1 || true
 }
 
+# --- Gemeenten in Keycloak (VPS 3) ---------------------------------------------
+# GEMEENTEN in .env op VPS 3: "id:Naam:domein+domein,id:Naam:domein", bijvoorbeeld
+#   GEMEENTEN="haarlem:Gemeente Haarlem:haarlem.nl,zandvoort:Gemeente Zandvoort:zandvoort.nl"
+# Elke gemeente wordt een organisatie in Keycloak (alias = id, attribuut naam),
+# met haar e-maildomeinen. Een gebruiker met een e-mailadres op zo'n domein wordt
+# lid, en krijgt die gemeente als attribuut 'gemeente' (de thuisgemeente) als dat
+# nog leeg is. Een gebruiker kan lid zijn van meer gemeenten (bijvoorbeeld bij een
+# GR); de assistent werkt dan voor de thuisgemeente.
+# Voor een test: OA_KCADM="pad/naar/kcadm.sh --config ..." (al ingelogd).
+GEMEENTEN_STANDAARD='"haarlem:Gemeente Haarlem:haarlem.nl,zandvoort:Gemeente Zandvoort:zandvoort.nl"'
+
+# Leest GEMEENTEN en schrijft per gemeente een regel "id<TAB>naam<TAB>domein domein".
+gemeenten_lijst() {
+  local tekst="$1" deel id naam domeinen
+  tekst="${tekst#\"}"; tekst="${tekst%\"}"
+  IFS=',' read -r -a delen <<< "$tekst"
+  for deel in "${delen[@]}"; do
+    deel="$(echo "$deel" | sed 's/^ *//; s/ *$//')"
+    [ -n "$deel" ] || continue
+    id="${deel%%:*}"; naam="${deel#*:}"; domeinen=""
+    [ "$naam" = "$deel" ] && naam="$id"
+    if [[ "$naam" == *:* ]]; then domeinen="${naam##*:}"; naam="${naam%:*}"; fi
+    [[ "$id" =~ ^[a-z0-9-]{2,40}$ ]] || { waarschuw "GEMEENTEN: '$id' is geen geldige gemeente (kleine letters, cijfers en -)."; continue; }
+    printf '%s\t%s\t%s\n' "$id" "$naam" "${domeinen//+/ }"
+  done
+}
+
+keycloak_gemeenten() {
+  local compose="$1" env="$OA_UITROL/.env" R=gemeenten tekst gebruiker wachtwoord binnen=nee
+  tekst="$(sed -n 's/^GEMEENTEN=//p' "$env" | tail -1)"
+  if [ -z "$tekst" ]; then
+    waarschuw "Geen GEMEENTEN in .env: de gemeenten in Keycloak blijven zoals ze zijn."
+    return 0
+  fi
+  if [ -n "${OA_KCADM:-}" ]; then
+    kcg() { $OA_KCADM "$@"; }
+    binnen=ja
+  else
+    gebruiker="$(sed -n 's/^KC_BEHEERDER=//p' "$env" | tail -1)"
+    wachtwoord="$(sed -n 's/^KC_BEHEERDER_WACHTWOORD=//p' "$env" | tail -1)"
+    kcg() { docker compose -f "$compose" --env-file "$env" exec -T keycloak /opt/keycloak/bin/kcadm.sh "$@" --config /tmp/oa-kcadm-g.config; }
+    for _ in $(seq 1 30); do
+      kcg config credentials --server http://localhost:8080 --realm master \
+        --user "${gebruiker:-beheer}" --password "$wachtwoord" >/dev/null 2>&1 && { binnen=ja; break; }
+      sleep 3
+    done
+  fi
+  if [ "$binnen" = nee ]; then
+    waarschuw "Gemeenten niet bijgewerkt: inloggen op Keycloak lukte niet."
+    return 0
+  fi
+  command -v jq >/dev/null || apt-get install -y -qq jq >/dev/null
+
+  # Organisaties aan, en de scope 'organization' (claim met alle gemeenten en hun
+  # naam) op de clients van de integratielaag en het beheerportaal.
+  kcg update "realms/$R" -s organizationsEnabled=true >/dev/null
+  local scope mapper client cid
+  scope="$(kcg get client-scopes -r $R --fields id,name 2>/dev/null | jq -r '.[] | select(.name=="organization") | .id')"
+  if [ -n "$scope" ]; then
+    mapper="$(kcg get "client-scopes/$scope/protocol-mappers/models" -r $R 2>/dev/null | jq -r '[.[] | select(.protocolMapper=="oidc-organization-membership-mapper")][0].id // empty')"
+    [ -n "$mapper" ] && kcg update "client-scopes/$scope/protocol-mappers/models/$mapper" -r $R \
+      -s name=organization -s protocol=openid-connect -s protocolMapper=oidc-organization-membership-mapper \
+      -s 'config."claim.name"=organization' -s 'config."jsonType.label"=JSON' -s 'config."multivalued"=true' \
+      -s 'config."addOrganizationAttributes"=true' -s 'config."id.token.claim"=true' \
+      -s 'config."access.token.claim"=true' -s 'config."introspection.token.claim"=true' >/dev/null
+    for client in oa-integratielaag oa-beheer; do
+      cid="$(kcg get clients -r $R -q clientId=$client --fields id 2>/dev/null | jq -r '.[0].id // empty')"
+      [ -n "$cid" ] || continue
+      if ! kcg get "clients/$cid/optional-client-scopes" -r $R 2>/dev/null | jq -e '.[] | select(.name=="organization")' >/dev/null \
+         && ! kcg get "clients/$cid/default-client-scopes" -r $R 2>/dev/null | jq -e '.[] | select(.name=="organization")' >/dev/null; then
+        kcg update "clients/$cid/optional-client-scopes/$scope" -r $R >/dev/null && ok "Scope organization op $client"
+      fi
+    done
+  else
+    waarschuw "Keycloak heeft geen scope 'organization'; is dit Keycloak 26 of nieuwer?"
+  fi
+
+  # Per gemeente een organisatie met domeinen.
+  local id naam domeinen oid json d
+  declare -A ORG_VAN_DOMEIN=()
+  while IFS=$'\t' read -r id naam domeinen; do
+    json="$(jq -cn --arg n "$naam" --arg a "$id" --arg d "$domeinen" \
+      '{name:$n, alias:$a, enabled:true, attributes:{naam:[$n]}, domains:[($d|split(" ")[]|select(length>0)|{name:., verified:true})]}')"
+    oid="$(kcg get organizations -r $R -q max=1000 2>/dev/null | jq -r --arg a "$id" '.[] | select(.alias==$a) | .id' | head -1)"
+    if [ -z "$oid" ]; then
+      echo "$json" | kcg create organizations -r $R -f - >/dev/null 2>&1 && ok "Gemeente $id ($naam) aangemaakt in Keycloak" \
+        || { waarschuw "Gemeente $id aanmaken in Keycloak lukte niet (staat een domein al bij een andere gemeente?)."; continue; }
+      oid="$(kcg get organizations -r $R -q max=1000 | jq -r --arg a "$id" '.[] | select(.alias==$a) | .id' | head -1)"
+    else
+      echo "$json" | kcg update "organizations/$oid" -r $R -f - >/dev/null || waarschuw "Gemeente $id bijwerken in Keycloak lukte niet."
+    fi
+    for d in $domeinen; do ORG_VAN_DOMEIN[$d]="$id $oid"; done
+  done < <(gemeenten_lijst "$tekst")
+
+  # Gebruikers koppelen op hun e-maildomein.
+  local eerste=0 blok u uid email dom thuis gekoppeld=0 zonder=0 doel
+  while :; do
+    blok="$(kcg get users -r $R -q first=$eerste -q max=200 -q briefRepresentation=false 2>/dev/null)" || break
+    [ "$(echo "$blok" | jq 'length')" -gt 0 ] || break
+    while IFS=$'\t' read -r uid email thuis; do
+      dom="${email##*@}"
+      doel="${ORG_VAN_DOMEIN[$dom]:-}"
+      if [ -z "$doel" ]; then
+        [ -n "$thuis" ] || zonder=$((zonder + 1))
+        continue
+      fi
+      id="${doel%% *}"; oid="${doel#* }"
+      if ! kcg get "organizations/$oid/members/$uid" -r $R >/dev/null 2>&1; then
+        kcg create "organizations/$oid/members" -r $R -b "\"$uid\"" >/dev/null 2>&1 && gekoppeld=$((gekoppeld + 1))
+      fi
+      [ -n "$thuis" ] || kcg update "users/$uid" -r $R -s "attributes.gemeente=[\"$id\"]" >/dev/null 2>&1 || true
+    done < <(echo "$blok" | jq -r '.[] | [.id, (.email // ""), (.attributes.gemeente[0] // "")] | @tsv')
+    eerste=$((eerste + 200))
+  done
+  ok "Gemeenten in Keycloak bijgewerkt; $gekoppeld gebruiker(s) nieuw gekoppeld op e-maildomein"
+  [ "$zonder" -eq 0 ] || waarschuw "$zonder gebruiker(s) horen nog bij geen gemeente: hun e-maildomein staat niet in GEMEENTEN."
+  [ -n "${OA_KCADM:-}" ] || docker compose -f "$compose" --env-file "$env" exec -T keycloak rm -f /tmp/oa-kcadm-g.config >/dev/null 2>&1 || true
+}
+
 geldig_domein() { [[ "$1" =~ ^([a-z0-9]([a-z0-9-]*[a-z0-9])?\.)+[a-z]{2,}$ ]]; }
 geldig_ip()     { [[ "$1" =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}$ ]]; }
 geldige_wg()    { [[ "$1" =~ ^[A-Za-z0-9+/]{42}[AEIMQUYcgkosw048]=$ ]]; }

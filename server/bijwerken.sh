@@ -43,6 +43,7 @@ if [ "$ROL" = gemeenschap ]; then
   exit 0
 fi
 [ "$ROL" = toegang ] && vul_toegang_aan .env
+[ "$ROL" = diensten ] && vul_env_aan .env GEMEENTEN "$GEMEENTEN_STANDAARD"
 HUISSTIJL_VOOR="$(controlesom huisstijl/huisstijl.css)"
 case "$ROL" in toegang|diensten) huisstijl_bijwerken ;; esac
 HUISSTIJL_NU="$(controlesom huisstijl/huisstijl.css)"
@@ -69,6 +70,7 @@ if [ "$ROL" = diensten ]; then
   THEMA_NU="$(git rev-parse -q --verify HEAD:keycloak-thema 2>/dev/null || echo geen)"
   # Keycloak houdt thema en huisstijl in het geheugen: herstarten na een wijziging.
   keycloak_thema "$COMPOSE" "$([ "${OA_THEMA_VOOR:-geen}" != "$THEMA_NU" ] || [ "$HUISSTIJL_VOOR" != "$HUISSTIJL_NU" ] && echo ja || echo nee)"
+  keycloak_gemeenten "$COMPOSE"
 fi
 docker image prune -f >/dev/null
 ok "Bijgewerkt"

@@ -1,5 +1,12 @@
 # Wijzigingen
 
+## 0.32.0 — 2026-11-23
+
+- **Meer gemeenten in één inrichting.** Nieuw: `docs/multi-tenant.md` en OA-ADR-012. Elke gemeente in `GEMEENTEN` op VPS 3 (met e-maildomeinen) wordt een organisatie in Keycloak; gebruikers worden op hun e-maildomein gekoppeld. `bijwerken.sh` doet dat op VPS 3 bij elke ronde; na een wijziging los: `server/gemeenten.sh`. Een nieuwe gemeente meldt zich daarna vanzelf aan bij het platform.
+- Beheerportaal voor een GR: `BEHEER_GEMEENTEN` op VPS 1 (dezelfde waarde als `GEMEENTEN` op VPS 3).
+- Werkplaats: oa-contract 0.14.0, opendop-mini 0.19.0, oa-services 0.7.1, oa-kern 0.14.0, oa-paneel 0.22.0, oa-adapters 0.21.1, oa-integratielaag 0.14.0; oa-beheer 0.17.0.
+- Uitrollen: `bijwerken.sh` op VPS 3, dan VPS 2 (migratie 012 gaat vanzelf), dan VPS 1 (migratie 006 van het portaal gaat vanzelf). Controleer daarna op VPS 3 de regel `GEMEENTEN` in `.env`: die is aangevuld met haarlem.nl en zandvoort.nl.
+
 ## 0.31.0 — 2026-11-20
 
 - **Documenteigenschappen en de titel.** Ontwerp in `docs/ontwerp/documenteigenschappen.md`: de documenttitel volgens WCAG 2.4.2 in de eigenschappen, hooguit één regel met het opmaakprofiel Titel, metadata en eigenschappen in beide richtingen, en anonimiseren van de eigenschappen (auteur wordt de organisatie).
