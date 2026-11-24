@@ -98,7 +98,7 @@ Na de proef volgt het besluit, met een schatting. Bij hergebruik van Python is d
 
 ## Proefversie (oa-adapters 0.23.0, oa-uitrol 0.35.0)
 
-Naast de gewone pagina `/collabora` staat nu een proef. Sinds oa-uitrol 0.35.1 staat ze standaard aan, met een eigen kaart op de voorpagina van `office.<domein>`. Let op: `experimental_features` zet alle experimentele functies van Collabora aan, dus ook voor de gewone Collabora-pagina; `COLLABORA_EXPERIMENTEEL=false` zet ze (en de proef) uit. De opzet volgt het voorstel hierboven, met variant A (geneste iframe) en een JavaScript-versie van de documentlogica. Code: `oa-adapters/collabora-extensie/` (met README).
+Naast de gewone pagina `/collabora` staat nu een proef. Sinds oa-uitrol 0.35.1 staat ze standaard aan, als extra optie in de kaart Collabora Online op de voorpagina van `office.<domein>`. Let op: `experimental_features` zet alle experimentele functies van Collabora aan, dus ook voor de gewone Collabora-pagina; `COLLABORA_EXPERIMENTEEL=false` zet ze (en de proef) uit. De opzet volgt het voorstel hierboven, met variant A (geneste iframe) en een JavaScript-versie van de documentlogica. Code: `oa-adapters/collabora-extensie/` (met README).
 
 - **Pakket** (`collabora-extensie/pakket`): `manifest.json` (0.1, alleen `text`), `icon.svg`, `index.html`, `brug.js` en `kit.js`. Op VPS 1 krijgt Collabora het als volume in `/usr/share/coolwsd/browser/dist/extensions/nl.digitaalgemeengoed.office-assistent`.
 - **`kit.js`**: één afgesloten functie `oaKit(opdracht, a)` voor `cool.callRemote`. Ze bevat de logica van `oa_document.py` en het Writer-deel van `oa_tekst.py`, en antwoordt altijd met `{ok, waarde}` of `{ok: false, fout, melding}`.

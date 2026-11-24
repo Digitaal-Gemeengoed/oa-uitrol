@@ -2,7 +2,7 @@
 
 ## 0.35.1 — 2026-11-24
 
-- De proef met de assistent als extensie in Collabora staat **standaard aan** (`COLLABORA_EXPERIMENTEEL=true`) en heeft een eigen kaart op de voorpagina van `office.<domein>`, met wat werkt, wat (nog) niet, en de vermeldingen (proef; raamwerk van Collabora experimenteel; merk en licentie van Collabora Online; EUPL 1.2). Ook een regel in "Wat werkt waar".
+- De proef met de assistent als extensie in Collabora staat **standaard aan** (`COLLABORA_EXPERIMENTEEL=true`) en staat op de voorpagina van `office.<domein>` als extra optie in de kaart Collabora Online (knop *Assistent als extensie (proef)*), met wat werkt, wat (nog) niet, en de vermeldingen (proef; raamwerk van Collabora experimenteel; merk en licentie van Collabora Online; EUPL 1.2). Ook een regel in "Wat werkt waar".
 - Let op: `experimental_features` geldt voor heel Collabora, dus ook voor de gewone Collabora-pagina. Uitzetten: `COLLABORA_EXPERIMENTEEL=false`.
 - Uitrollen: `bijwerken.sh` op VPS 1. Had je 0.35.0 al uitgerold, zet dan eerst in `.env` de regel `COLLABORA_EXPERIMENTEEL=false` op `true`.
 

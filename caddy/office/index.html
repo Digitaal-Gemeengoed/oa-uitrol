@@ -56,9 +56,7 @@ h2 { font-size: 21px; margin: 36px 0 6px; }
 .apps .gepland::before { content: "…"; }
 .apps .ongetest { background: var(--gepland-vlak); color: var(--gepland); }
 .apps .ongetest::before { content: "?"; }
-.apps .proef { background: var(--gepland-vlak); color: var(--gepland); }
-.apps .proef::before { content: "β"; }
-.vermelding { font-size: 14px; color: var(--zacht); }
+.vermelding { font-size: 14px; color: var(--zacht); margin: 8px 0 0; }
 .versie { font-size: 14px; color: var(--zacht); }
 .versie code { font-size: 13px; }
 .acties { margin-top: auto; display: flex; flex-wrap: wrap; gap: 8px; }
@@ -118,29 +116,21 @@ td.g, td.o { color: var(--gepland); }
           <li class="werkt">Presentatie</li>
         </ul>
         <p>De editor draait op <code>office.haarlem.dev</code>, het paneel als iframe ernaast. Het origineel (.docx, .ods of .odp) wordt bewaard.</p>
-        <div class="acties"><a class="knop vol" href="https://oa.haarlem.dev/collabora">Openen</a></div>
-      </article>
-
-      <article class="kaart" aria-labelledby="k-collabora-extensie">
-        <h3 id="k-collabora-extensie">Collabora Online, assistent als extensie <small>(proef)</small></h3>
-        <p class="soort">De assistent in Collabora zelf · niets te installeren</p>
-        <ul class="apps" aria-label="Toepassingen">
-          <li class="proef" title="Proef: gebouwd en buiten Collabora getest; in Collabora nog in beproeving">Tekst</li>
-          <li class="gepland">Rekenblad</li>
-          <li class="gepland">Presentatie</li>
-        </ul>
-        <p>Geen paneel naast de editor: de assistent staat in Collabora, onder <strong>Extensies → Office Assistent</strong>, en werkt live in het document, ook als anderen meewerken. Dit gebruikt het nieuwe extensieraamwerk van Collabora Online (<code>cool.js</code>, JS-UNO).</p>
+        <p><strong>Nieuw, als proef:</strong> de assistent <em>in</em> Collabora, onder <strong>Extensies → Office Assistent</strong>, in plaats van ernaast. Hij werkt dan live in het document, ook als anderen meewerken. Voorlopig alleen voor tekst.</p>
         <details>
-          <summary>Wat kan het, en wat (nog) niet</summary>
+          <summary>De proef: wat kan het, en wat (nog) niet</summary>
           <ol>
-            <li>Open een tekstbestand en kies in Collabora het tabblad <strong>Extensies</strong> (in de compacte weergave het menu <strong>Extensies</strong>) en dan <strong>Office Assistent</strong>.</li>
+            <li>Kies <strong>Assistent als extensie (proef)</strong>, open een tekstbestand en kies in Collabora het tabblad <strong>Extensies</strong> (in de compacte weergave het menu <strong>Extensies</strong>) en dan <strong>Office Assistent</strong>.</li>
             <li>Werkt: lezen en beoordelen, toegankelijkheid herstellen op de plek zelf (koppen, tabelkop, alternatieve tekst, linktekst), tonen in het document, de selectie lezen, tekst vervangen en documenteigenschappen.</li>
-            <li>Nog niet: anonimiseren in het document (plaatshouders), rekenbladen en presentaties. Gebruik daarvoor de gewone Collabora-pagina hiernaast.</li>
-            <li>Verschijnt het paneel niet, of meldt het een fout? Stuur een schermafdruk met de melding uit het paneel mee (zie Testen).</li>
+            <li>Nog niet: anonimiseren in het document (plaatshouders), rekenbladen en presentaties. Gebruik daarvoor <strong>Openen</strong>.</li>
+            <li>Verschijnt het paneel niet, of meldt het een fout? Stuur een schermafdruk met de melding mee (zie Testen).</li>
           </ol>
+          <p class="vermelding">Proef. Het extensieraamwerk van Collabora (<code>cool.js</code>, JS-UNO) is zelf nog experimenteel: manifest 0.1, de interface ligt nog niet vast. Een nieuwe versie van Collabora kan de proef tijdelijk breken. Collabora Online is een merk van Collabora Productivity Ltd.; het raamwerk is open source (MPL 2.0). De extensie hoort bij de Office Assistent (EUPL 1.2) en is geen product van Collabora.</p>
         </details>
-        <p class="vermelding">Proef. Het extensieraamwerk van Collabora is zelf nog experimenteel (manifest 0.1, de interface ligt nog niet vast); een nieuwe versie van Collabora kan de proef tijdelijk breken. Collabora Online is een merk van Collabora Productivity Ltd.; het raamwerk is open source (MPL 2.0). De extensie hoort bij de Office Assistent (EUPL 1.2) en is geen product van Collabora.</p>
-        <div class="acties"><a class="knop vol" data-oa="/collabora-proef" href="https://oa.haarlem.dev/collabora-proef">Openen</a></div>
+        <div class="acties">
+          <a class="knop vol" href="https://oa.haarlem.dev/collabora">Openen</a>
+          <a class="knop leeg" data-oa="/collabora-proef" href="https://oa.haarlem.dev/collabora-proef">Assistent als extensie (proef)</a>
+        </div>
       </article>
 
       <article class="kaart" aria-labelledby="k-word">
