@@ -1,5 +1,10 @@
 # Wijzigingen
 
+## 0.34.1 — 2026-11-24
+
+- Werkplaats: oa-adapters 0.22.1 (LibreOffice-extensie 0.18.1): het zijpaneel werkt weer bij een nieuw, leeg document.
+- Uitrollen: `bijwerken.sh` op VPS 1 (de integratielaag levert de nieuwe extensie). Daarna de extensie opnieuw downloaden en installeren (Extra → Extensiebeheer → Toevoegen, dan LibreOffice herstarten).
+
 ## 0.34.0 — 2026-11-23
 
 - **Gemeenten beheren in het portaal.** `docs/multi-tenant.md` bijgewerkt: Keycloak is de bron voor gemeenten en domeinen; een GR-brede beheerder met het recht *Gemeenten beheren* voegt gemeenten toe op de pagina Gemeenten (oa-beheer 0.18.0).
