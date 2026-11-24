@@ -117,8 +117,8 @@ vul_toegang_aan() {
   vul_env_aan "$1" BEHEER_OIDC_SECRET ""
   vul_env_aan "$1" COLLABORA_INTERN "http://collabora:9980"
   vul_env_aan "$1" COLLABORA_VERSIE "26.04.5.2.1"
-  # Proef: extensies in Collabora (de assistent als extensie, /collabora-proef).
-  vul_env_aan "$1" COLLABORA_EXPERIMENTEEL "false"
+  # Proef: extensies in Collabora (de assistent als extensie, /collabora-proef). Standaard aan.
+  vul_env_aan "$1" COLLABORA_EXPERIMENTEEL "true"
   if grep -q '^COMPOSE_PROFILES=' "$1"; then
     grep -q '^COMPOSE_PROFILES=.*collabora' "$1" || sed -i 's/^COMPOSE_PROFILES=\(.*\)$/COMPOSE_PROFILES=\1,collabora/; s/^COMPOSE_PROFILES=,/COMPOSE_PROFILES=/' "$1"
   else

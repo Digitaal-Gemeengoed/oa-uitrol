@@ -98,7 +98,7 @@ Na de proef volgt het besluit, met een schatting. Bij hergebruik van Python is d
 
 ## Proefversie (oa-adapters 0.23.0, oa-uitrol 0.35.0)
 
-Naast de gewone pagina `/collabora` staat nu een proef, standaard uit. De opzet volgt het voorstel hierboven, met variant A (geneste iframe) en een JavaScript-versie van de documentlogica. Code: `oa-adapters/collabora-extensie/` (met README).
+Naast de gewone pagina `/collabora` staat nu een proef. Sinds oa-uitrol 0.35.1 staat ze standaard aan, met een eigen kaart op de voorpagina van `office.<domein>`. Let op: `experimental_features` zet alle experimentele functies van Collabora aan, dus ook voor de gewone Collabora-pagina; `COLLABORA_EXPERIMENTEEL=false` zet ze (en de proef) uit. De opzet volgt het voorstel hierboven, met variant A (geneste iframe) en een JavaScript-versie van de documentlogica. Code: `oa-adapters/collabora-extensie/` (met README).
 
 - **Pakket** (`collabora-extensie/pakket`): `manifest.json` (0.1, alleen `text`), `icon.svg`, `index.html`, `brug.js` en `kit.js`. Op VPS 1 krijgt Collabora het als volume in `/usr/share/coolwsd/browser/dist/extensions/nl.digitaalgemeengoed.office-assistent`.
 - **`kit.js`**: één afgesloten functie `oaKit(opdracht, a)` voor `cool.callRemote`. Ze bevat de logica van `oa_document.py` en het Writer-deel van `oa_tekst.py`, en antwoordt altijd met `{ok, waarde}` of `{ok: false, fout, melding}`.
@@ -118,7 +118,7 @@ Wat dit niet toetst, is hoe JS-UNO in Collabora zelf waarden en eigenschappen aa
 
 **Op de testserver (VPS 1):**
 
-1. Zet in `/opt/oa-uitrol/.env` de regel `COLLABORA_EXPERIMENTEEL=true` en draai `bijwerken.sh`.
+1. Draai `bijwerken.sh`. Staat in `/opt/oa-uitrol/.env` nog `COLLABORA_EXPERIMENTEEL=false` (van 0.35.0), zet die dan eerst op `true`.
 2. Open `https://oa.<domein>/collabora-proef`, kies of maak een tekstbestand, en kies in Collabora **Extensies → Office Assistent**.
 3. Ziet u geen tabblad Extensies: controleer in de container of de map er staat (`docker compose exec collabora ls /usr/share/coolwsd/browser/dist/extensions`) en of `home_mode` de extensies tegenhoudt (zet tijdelijk `--o:home_mode.enable=false`).
 4. Meldt het paneel zich niet binnen 20 seconden, dan toont de extensie een melding. Kijk in de console van de browser of `frame-src` de pagina van `oa.<domein>` tegenhoudt. Is dat zo, dan is variant B nodig, of een aanvulling via `--o:net.content_security_policy`.
