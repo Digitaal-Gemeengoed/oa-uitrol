@@ -1,5 +1,12 @@
 # Wijzigingen
 
+## 0.35.0 — 2026-11-24
+
+- **Proef: de assistent als extensie in Collabora Online** (oa-adapters 0.23.0, oa-integratielaag 0.15.0), naast de gewone Collabora-pagina. Standaard uit.
+  - VPS 1: Collabora krijgt het pakket als volume (`bron/oa-adapters/collabora-extensie/pakket`) en `--o:experimental_features=${COLLABORA_EXPERIMENTEEL}`; `.env` krijgt `COLLABORA_EXPERIMENTEEL=false`.
+  - Caddy: `/collabora-extensie` mag in een iframe van `office.<domein>` (frame-ancestors).
+  - Aanzetten: `COLLABORA_EXPERIMENTEEL=true` in `.env` op VPS 1, `bijwerken.sh`, dan `https://oa.<domein>/collabora-proef`. Proefplan: `docs/ontwerp/collabora-extensie.md`.
+
 ## 0.34.1 — 2026-11-24
 
 - Werkplaats: oa-adapters 0.22.1 (LibreOffice-extensie 0.18.1): het zijpaneel werkt weer bij een nieuw, leeg document.

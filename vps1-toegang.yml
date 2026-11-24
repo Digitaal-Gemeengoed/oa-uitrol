@@ -97,6 +97,12 @@ services:
         --o:admin_console.enable=false
         --o:welcome.enable=false
         --o:home_mode.enable=true
+        --o:experimental_features=${COLLABORA_EXPERIMENTEEL:-false}
+    # Proef: de Office Assistent als extensie in Collabora (oa-adapters/
+    # collabora-extensie/pakket). Werkt alleen met COLLABORA_EXPERIMENTEEL=true;
+    # de pagina is /collabora-proef. Zie docs/ontwerp/collabora-extensie.md.
+    volumes:
+      - ./bron/oa-adapters/collabora-extensie/pakket:/usr/share/coolwsd/browser/dist/extensions/nl.digitaalgemeengoed.office-assistent:ro
 
   # Beheerportaal: database (niet gepubliceerd), migratie, portaal.
   beheer-db:

@@ -2,6 +2,12 @@
 
 oa.{$DOMEIN} {
 	encode zstd gzip
+	# Proef: het paneel van de extensie staat in een iframe van Collabora (office.<domein>).
+	@extensie path /collabora-extensie /collabora-extensie/*
+	header @extensie {
+		defer
+		Content-Security-Policy "frame-ancestors 'self' https://office.{$DOMEIN}"
+	}
 	# Wie deze pagina's in een iframe mag zetten, bepaalt de integratielaag zelf
 	# (frame-ancestors): alleen zijzelf, en voor /word/ ook Word voor het web.
 	header Strict-Transport-Security "max-age=31536000"

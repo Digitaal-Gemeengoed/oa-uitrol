@@ -1,6 +1,6 @@
 # Office Assistent als extensie in Collabora Online
 
-*Prototype Digitaal GemeenGoed · 24 november 2026 · verkenning, nog geen besluit*
+*Prototype Digitaal GemeenGoed · 24 november 2026 · verkenning met proefversie (oa-adapters 0.23.0), nog geen besluit*
 
 ## Aanleiding
 
@@ -95,6 +95,34 @@ Sinds CODE 26.04.5.1 (12 oktober 2026) draaien add-ons voor Google Docs, Sheets 
 4. **Twee gebruikers.** Twee gebruikers in één document: komt een wijziging via `callRemote` bij beiden aan? Geeft `getCurrentFrame()` steeds het venster van de vragende gebruiker, ook voor de selectie?
 
 Na de proef volgt het besluit, met een schatting. Bij hergebruik van Python is de bouw ruwweg één à twee weken; bij overzetten naar JavaScript komen daar één à twee weken bij. Dat zijn grove schattingen.
+
+## Proefversie (oa-adapters 0.23.0, oa-uitrol 0.35.0)
+
+Naast de gewone pagina `/collabora` staat nu een proef, standaard uit. De opzet volgt het voorstel hierboven, met variant A (geneste iframe) en een JavaScript-versie van de documentlogica. Code: `oa-adapters/collabora-extensie/` (met README).
+
+- **Pakket** (`collabora-extensie/pakket`): `manifest.json` (0.1, alleen `text`), `icon.svg`, `index.html`, `brug.js` en `kit.js`. Op VPS 1 krijgt Collabora het als volume in `/usr/share/coolwsd/browser/dist/extensions/nl.digitaalgemeengoed.office-assistent`.
+- **`kit.js`**: één afgesloten functie `oaKit(opdracht, a)` voor `cool.callRemote`. Ze bevat de logica van `oa_document.py` en het Writer-deel van `oa_tekst.py`, en antwoordt altijd met `{ok, waarde}` of `{ok: false, fout, melding}`.
+- **`brug.js`**: neemt alleen berichten aan van het eigen paneel (bron en herkomst), en voert alleen vaste opdrachten uit. Gebeurtenissen (selectie, gewijzigd) gaan naar het paneel.
+- **Paneel**: `oa.<domein>/collabora-extensie` met `CollaboraKitTekstverwerker` onder de gewone `StructuurAdapter`. Het controleert de herkomst van de extensie: https op hetzelfde domein. Caddy staat de pagina toe in een iframe van `office.<domein>`.
+- **Werkbestand openen**: `oa.<domein>/collabora-proef`, de gewone pagina zonder paneel ernaast.
+
+**Wat werkt (Writer):** lezen en beoordelen; herstellen op een plek (kopniveau, kopregel, alternatieve tekst, linktekst); tonen; selectie lezen; tekst vervangen (anonimiseren bij de bron); documenteigenschappen lezen en schrijven. **Nog niet:** anonimiseren in het document (plaatshouders, klikken), rekenbladen en presentaties, de taal van het document, het bestand zelf vastleggen.
+
+**Getest zonder Collabora** (Gerrit en Docker Hub waren niet bereikbaar):
+
+1. `kit.js` draait in QuickJS (dezelfde motor als in Collabora) tegen een echte LibreOffice 24.2. Een `uno`-object geeft daarbij elke aanroep via JSON door aan PyUNO. Blokken en eigenschappen zijn gelijk aan wat de Python-extensie leest; opdrachten, tonen, selectie en tekst vervangen werken (8 tests).
+2. De keten paneel → `brug.js` → nagebootste `cool.js` → `oaKit` → LibreOffice, in Chromium: het paneel start en leest het document.
+3. De echte `StructuurAdapter` met de herstelroute van `oa-kern`: een alinea wordt een kop van niveau 2 en staat daarna echt zo in het document.
+
+Wat dit niet toetst, is hoe JS-UNO in Collabora zelf waarden en eigenschappen aanbiedt. Daarom gaat `kit.js` defensief om met eigenschappen: `getPropertyValue`, dan `getX`, dan directe toegang.
+
+**Op de testserver (VPS 1):**
+
+1. Zet in `/opt/oa-uitrol/.env` de regel `COLLABORA_EXPERIMENTEEL=true` en draai `bijwerken.sh`.
+2. Open `https://oa.<domein>/collabora-proef`, kies of maak een tekstbestand, en kies in Collabora **Extensies → Office Assistent**.
+3. Ziet u geen tabblad Extensies: controleer in de container of de map er staat (`docker compose exec collabora ls /usr/share/coolwsd/browser/dist/extensions`) en of `home_mode` de extensies tegenhoudt (zet tijdelijk `--o:home_mode.enable=false`).
+4. Meldt het paneel zich niet binnen 20 seconden, dan toont de extensie een melding. Kijk in de console van de browser of `frame-src` de pagina van `oa.<domein>` tegenhoudt. Is dat zo, dan is variant B nodig, of een aanvulling via `--o:net.content_security_policy`.
+5. Werkt het paneel: probeer Toegankelijkheid → Beoordelen → Herstellen, en Metadateren (eigenschappen). Probeer het ook met twee gebruikers in één document (proefvraag 4).
 
 ## Vragen voor de bijdrager van Collabora
 
