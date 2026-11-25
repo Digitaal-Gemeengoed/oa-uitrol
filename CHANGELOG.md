@@ -1,5 +1,9 @@
 # Wijzigingen
 
+## 0.37.3 — 2026-11-25
+
+- oa-adapters 0.24.1 (LibreOffice-extensie 0.19.1): een geanonimiseerd document dat als .docx is opgeslagen, wordt weer herkend. Uitrollen: `bijwerken.sh` op VPS 1, daarna de extensie 0.19.1 opnieuw installeren.
+
 ## 0.37.2 — 2026-11-25
 
 - Toegankelijkheidscontrole (oa-wcag 0.1.1): de plaatshouders van de anonimisering gelden niet meer als "gekleurde tekst zonder extra visuele aanduiding" (WCAG 1.4.1). Uitrollen: `bijwerken.sh` op VPS 3.
