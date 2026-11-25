@@ -128,3 +128,23 @@ body.oa-login {
 .oa-voet { display: flex; flex-direction: column; gap: 6px; border-top: 1px solid var(--utrecht-separator-color, #ccc); padding-top: 10px; color: var(--utrecht-paragraph-small-color, #555); }
 .oa-talen { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 0.8125rem; }
 .oa-talen [aria-current] { font-weight: 600; }
+
+/* --- Herstelcodes en de keuze tussen apps (docs/inloggen-herstel.md) --- */
+.oa-login .pf-screen-reader, .oa-login .pf-v5-screen-reader {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+}
+.oa-herstel-waarschuwing { border-left: 4px solid var(--oa-waarschuwing, #b35900); background: var(--oa-waarschuwing-vlak, #fff4e5); padding: 10px 12px; border-radius: 4px; margin: 0 0 12px; }
+.oa-herstel-waarschuwing .pf-c-alert__icon { display: none; }
+.oa-herstel-waarschuwing .pf-c-alert__title { margin: 0 0 4px; font-size: 0.9375rem; }
+.oa-herstel-waarschuwing p { margin: 0; font-size: 0.875rem; }
+.oa-herstelcodes { margin: 0 0 12px; padding: 10px 12px; list-style: none; columns: 2; column-gap: 16px; background: var(--oa-vlak, #f3f3f3); border-radius: 4px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.875rem; }
+.oa-herstelcodes li { break-inside: avoid; padding: 2px 0; }
+.oa-herstelcodes li span { display: inline-block; min-width: 2.2em; color: var(--oa-zacht, #5c5c5c); }
+.oa-herstel-knoppen { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 12px; }
+.oa-herstel-knoppen .pf-c-button { font: inherit; font-size: 0.875rem; font-weight: 600; padding: 6px 12px; border: 1px solid var(--oa-primair); border-radius: 6px; background: transparent; color: var(--oa-primair); cursor: pointer; }
+.oa-herstel-knoppen .pf-c-button i { display: none; }
+.oa-opties:has(#kcRecoveryCodesConfirmationCheck) { justify-content: flex-start; align-items: center; font-size: 0.875rem; }
+.oa-app-keuze { border: 0; padding: 0; margin: 0 0 12px; }
+.oa-app-keuze legend { margin-bottom: 6px; }
+.oa-app-keuze .utrecht-form-field--radio { display: flex; align-items: center; gap: 8px; margin: 4px 0; }
+.oa-app-keuze .utrecht-form-field-description { margin: 6px 0 0; font-size: 0.8125rem; }

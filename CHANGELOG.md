@@ -1,5 +1,16 @@
 # Wijzigingen
 
+## 0.36.0 — 2026-11-25
+
+**De tweede factor herstellen.** Ontwerp en tests: `docs/inloggen-herstel.md`.
+- **Herstelcodes**: na het koppelen van de authenticator-app maakt iedereen twaalf herstelcodes aan; bestaande gebruikers bij hun volgende inlog. Bij het inloggen: *Op een andere manier inloggen → Herstelcode*. Het token meldt dan `amr: mfa`; het portaal accepteert dat als tweede factor.
+- **Wachtwoord of authenticator kwijt?** (herstel via e-mail): de link toont de QR-code opnieuw en vraagt een nieuw wachtwoord. De oude koppeling blijft staan tot de gebruiker haar verwijdert, zodat wie halverwege afhaakt nooit zonder authenticator staat. Alleen met e-mail voor Keycloak (`inlog.sh smtp`) en vanaf Keycloak 26.7.2 (CVE-2026-18963).
+- Nieuw script `server/inlog.sh` (VPS 3): `smtp`, `authenticator <e-mailadres>` (koppeling van één gebruiker resetten; na het wachtwoord de QR-code) en `status`.
+- Inlogthema: teksten in de je-vorm voor herstelcodes en herstel; eigen `login-otp.ftl` (bij meer apps de laatst gekoppelde voorgeselecteerd, met uitleg); opmaak van de pagina met herstelcodes; e-mailthema `oa` met een eigen herstelmail.
+- Aangescherpt: bescherming tegen raden aan (na tien pogingen oplopend wachten, max. 15 minuten); e-mailadres en gebruikersnaam alleen door een beheerder te wijzigen (het e-maildomein bepaalt de gemeente).
+- Voorpagina `office.<domein>`: uitleg "QR-code gemist, of je telefoon of app kwijt?".
+- Uitrollen: `bijwerken.sh` op VPS 3 (Keycloak herstart vanwege het thema), daarna `sudo /opt/oa-uitrol/server/inlog.sh smtp` op VPS 3 voor de herstellink. VPS 1: `bijwerken.sh` (voorpagina).
+
 ## 0.35.1 — 2026-11-24
 
 - De proef met de assistent als extensie in Collabora staat **standaard aan** (`COLLABORA_EXPERIMENTEEL=true`) en staat op de voorpagina van `office.<domein>` als extra optie in de kaart Collabora Online (knop *Assistent als extensie (proef)*), met wat werkt, wat (nog) niet, en de vermeldingen (proef; raamwerk van Collabora experimenteel; merk en licentie van Collabora Online; EUPL 1.2). Ook een regel in "Wat werkt waar".

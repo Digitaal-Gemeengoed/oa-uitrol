@@ -73,6 +73,7 @@ if [ "$ROL" = diensten ]; then
   keycloak_thema "$COMPOSE" "$([ "${OA_THEMA_VOOR:-geen}" != "$THEMA_NU" ] || [ "$HUISSTIJL_VOOR" != "$HUISSTIJL_NU" ] && echo ja || echo nee)"
   keycloak_gemeenten "$COMPOSE"
   gemeenten_timer
+  keycloak_herstel "$COMPOSE"
 fi
 docker image prune -f >/dev/null
 ok "Bijgewerkt"

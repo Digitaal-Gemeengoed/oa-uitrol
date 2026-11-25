@@ -202,6 +202,7 @@ EOF
     OA_TESTWACHTWOORD="$(sed -n 's/^OA_TESTWACHTWOORD=//p' .env)"
     keycloak_gemeenten "$COMPOSE"
     gemeenten_timer
+    keycloak_herstel "$COMPOSE"
     cat <<EOF
 
   Keycloak-beheer (via de SSH-tunnel, zie INRICHTING.md):

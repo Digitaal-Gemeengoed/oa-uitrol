@@ -448,6 +448,185 @@ EOT
     || waarschuw "De timer oa-gemeenten kon niet aan; kijk met: systemctl status oa-gemeenten.timer"
 }
 
+# --- Inloggen: herstelcodes en herstel via e-mail (VPS 3) -----------------------
+# Zie docs/inloggen-herstel.md.
+#
+# kc_verbind <compose>: logt in op Keycloak en geeft de functie kch (kcadm in de
+# container). Voor een test: OA_KCADM="pad/naar/kcadm.sh --config ..." (al ingelogd).
+kc_verbind() {
+  local compose="$1" env="$OA_UITROL/.env" gebruiker wachtwoord
+  if [ -n "${OA_KCADM:-}" ]; then
+    kch() { $OA_KCADM "$@"; }
+    return 0
+  fi
+  gebruiker="$(sed -n 's/^KC_BEHEERDER=//p' "$env" | tail -1)"
+  wachtwoord="$(sed -n 's/^KC_BEHEERDER_WACHTWOORD=//p' "$env" | tail -1)"
+  # shellcheck disable=SC2317
+  kch() { docker compose -f "$KC_COMPOSE" --env-file "$OA_UITROL/.env" exec -T keycloak /opt/keycloak/bin/kcadm.sh "$@" --config /tmp/oa-kcadm-h.config; }
+  KC_COMPOSE="$compose"
+  for _ in $(seq 1 30); do
+    kch config credentials --server http://localhost:8080 --realm master \
+      --user "${gebruiker:-beheer}" --password "$wachtwoord" >/dev/null 2>&1 && return 0
+    sleep 3
+  done
+  return 1
+}
+kc_klaar() {
+  [ -n "${OA_KCADM:-}" ] || docker compose -f "$KC_COMPOSE" --env-file "$OA_UITROL/.env" exec -T keycloak rm -f /tmp/oa-kcadm-h.config >/dev/null 2>&1 || true
+}
+
+# keycloak_herstel <compose>
+# - Herstelcodes: na het koppelen van de authenticator-app maakt iedereen
+#   herstelcodes aan; bij het inloggen kan "Op een andere manier inloggen" met
+#   een herstelcode. Bestaande gebruikers met een app krijgen de stap bij hun
+#   volgende inlog.
+# - Herstel via e-mail ("Wachtwoord of authenticator kwijt?"): alleen als
+#   Keycloak e-mail heeft (inlog.sh smtp). De link toont de QR-code opnieuw en
+#   vraagt een nieuw wachtwoord. De oude koppeling blijft staan tot de gebruiker
+#   haar zelf verwijdert ("Remove none"): wie na de link afhaakt, staat zo nooit
+#   zonder authenticator (Keycloak zet de nieuwe stap alleen in de sessie).
+# - Bescherming tegen raden (ook voor codes), en e-mailadres en gebruikersnaam
+#   alleen door een beheerder te wijzigen: het e-maildomein bepaalt de gemeente
+#   en de herstellink gaat naar dat adres.
+keycloak_herstel() {
+  local compose="$1" env="$OA_UITROL/.env" R=gemeenten flow ex otp rc rf cfg host
+  if ! kc_verbind "$compose"; then
+    waarschuw "Herstel bij inloggen niet ingesteld: inloggen op Keycloak lukte niet."
+    return 0
+  fi
+  command -v jq >/dev/null || apt-get install -y -qq jq >/dev/null
+
+  # Bescherming tegen raden: na 10 mislukte pogingen steeds langer wachten (max. 15 min).
+  kch update "realms/$R" -s bruteForceProtected=true -s permanentLockout=false -s failureFactor=10 \
+    -s waitIncrementSeconds=60 -s maxFailureWaitSeconds=900 -s maxDeltaTimeSeconds=43200 \
+    -s quickLoginCheckMilliSeconds=1000 -s minimumQuickLoginWaitSeconds=60 >/dev/null \
+    && ok "Bescherming tegen raden van wachtwoorden en codes staat aan"
+
+  # E-mailadres en gebruikersnaam: alleen de beheerder wijzigt ze.
+  if kch get users/profile -r $R 2>/dev/null \
+      | jq '.attributes |= map(if (.name == "email" or .name == "username") then .permissions.edit = ["admin"] else . end)' \
+      | kch update users/profile -r $R -f - >/dev/null 2>&1; then
+    ok "E-mailadres en gebruikersnaam zijn alleen door een beheerder te wijzigen"
+  else
+    waarschuw "E-mailadres alleen-beheerder zetten lukte niet: zet in Keycloak bij Realm settings → User profile → email → Permissions 'Who can edit' op alleen Admin."
+  fi
+
+  # Herstelcodes: de verplichte actie aan, en na het koppelen van de app verplicht.
+  if ! kch get authentication/required-actions/CONFIGURE_RECOVERY_AUTHN_CODES -r $R >/dev/null 2>&1; then
+    kch create authentication/register-required-action -r $R \
+      -s providerId=CONFIGURE_RECOVERY_AUTHN_CODES -s name="Recovery Authentication Codes" >/dev/null 2>&1 || true
+  fi
+  kch update authentication/required-actions/CONFIGURE_RECOVERY_AUTHN_CODES -r $R \
+    -s alias=CONFIGURE_RECOVERY_AUTHN_CODES -s name="Recovery Authentication Codes" \
+    -s providerId=CONFIGURE_RECOVERY_AUTHN_CODES -s enabled=true -s defaultAction=false -s priority=55 >/dev/null 2>&1
+  kch update authentication/required-actions/CONFIGURE_TOTP/config -r $R \
+    -b '{"config":{"add-recovery-codes":"true"}}' >/dev/null 2>&1 \
+    || waarschuw "Herstelcodes na het koppelen van de app verplicht maken lukte niet (Keycloak 26.3 of nieuwer nodig)."
+
+  # In de inlogflow: herstelcode als alternatief naast de app.
+  flow="$(kch get "realms/$R" --fields browserFlow 2>/dev/null | jq -r '.browserFlow')"
+  ex="$(kch get "authentication/flows/$(jq -rn --arg f "$flow" '$f|@uri')/executions" -r $R 2>/dev/null)"
+  otp="$(jq -r '[.[] | select(.providerId == "auth-otp-form")][0].id // empty' <<<"$ex")"
+  rc="$(jq -r '[.[] | select(.providerId == "auth-recovery-authn-code-form")][0].id // empty' <<<"$ex")"
+  if [ -n "$otp" ] && [ -n "$rc" ]; then
+    # De volledige stap terugsturen (anders zet Keycloak de prioriteit, en dus de
+    # volgorde, op 0); een prioriteit 0 krijgt de standaardplek (OTP 30, code 50).
+    for id in "$otp" "$rc"; do
+      kch update "authentication/flows/$(jq -rn --arg f "$flow" '$f|@uri')/executions" -r $R \
+        -b "$(jq -c --arg id "$id" '[.[] | select(.id == $id)][0] | .requirement = "ALTERNATIVE"
+              | if (.priority // 0) == 0 then .priority = (if .providerId == "auth-otp-form" then 30 else 50 end) else . end' <<<"$ex")" >/dev/null
+    done
+    # In het token: amr "mfa" na een herstelcode (de app geeft "otp", zie
+    # keycloak-beheer.sh); het portaal eist een tweede factor in amr.
+    local rcfg
+    rcfg="$(jq -r --arg id "$rc" '[.[] | select(.id == $id)][0].authenticationConfig // empty' <<<"$ex")"
+    if [ -n "$rcfg" ]; then
+      kch update "authentication/config/$rcfg" -r $R -b '{"alias":"oa-herstelcode-referentie","config":{"default.reference.value":"mfa"}}' >/dev/null 2>&1
+    else
+      kch create "authentication/executions/$rc/config" -r $R -b '{"alias":"oa-herstelcode-referentie","config":{"default.reference.value":"mfa"}}' >/dev/null 2>&1
+    fi
+    ok "Inloggen met een herstelcode kan (Op een andere manier inloggen); het portaal ziet dat als tweede factor"
+  else
+    waarschuw "De inlogflow '$flow' heeft geen stap voor herstelcodes. Zet in Keycloak bij Authentication → $flow 'Recovery Authentication Code Form' op Alternative (een eigen flow is nodig als dit een ingebouwde flow van vóór 26.3 is)."
+  fi
+
+  # Herstel via e-mail: alleen met e-mail voor Keycloak (inlog.sh smtp).
+  host="$(sed -n 's/^KC_SMTP_HOST=//p' "$env" | tail -1)"
+  # Vóór 26.7.2 had de herstelroute een ernstig lek (CVE-2026-18963): dan uit.
+  local versie
+  versie="$(kch get serverinfo 2>/dev/null | jq -r '.systemInfo.version // empty')"
+  if [ -n "$host" ] && [ -n "$versie" ] && [ "$(printf '%s\n26.7.2\n' "${versie%%-*}" | sort -V | head -1)" != 26.7.2 ]; then
+    waarschuw "Keycloak $versie is ouder dan 26.7.2 (lek CVE-2026-18963 in de herstelroute): 'Wachtwoord of authenticator kwijt?' blijft uit tot na de update."
+    host=""
+  fi
+  if [ -n "$host" ]; then
+    local poort tls gebr ww van naam
+    poort="$(sed -n 's/^KC_SMTP_POORT=//p' "$env" | tail -1)"
+    tls="$(sed -n 's/^KC_SMTP_TLS=//p' "$env" | tail -1)"
+    gebr="$(sed -n "s/^KC_SMTP_GEBRUIKER='\?\([^']*\)'\?$/\1/p" "$env" | tail -1)"
+    ww="$(sed -n "s/^KC_SMTP_WACHTWOORD='\?\([^']*\)'\?$/\1/p" "$env" | tail -1)"
+    van="$(sed -n "s/^KC_SMTP_VAN='\?\([^']*\)'\?$/\1/p" "$env" | tail -1)"
+    naam="$(sed -n "s/^KC_SMTP_VAN_NAAM='\?\([^']*\)'\?$/\1/p" "$env" | tail -1)"
+    jq -n --arg h "$host" --arg p "${poort:-587}" --arg t "${tls:-starttls}" --arg u "$gebr" --arg w "$ww" \
+      --arg v "${van:-$gebr}" --arg n "${naam:-Office Assistent}" \
+      '{resetPasswordAllowed: true, smtpServer: ({host: $h, port: $p, from: $v, fromDisplayName: $n,
+        ssl: (if $t == "tls" then "true" else "false" end), starttls: (if $t == "starttls" then "true" else "false" end),
+        auth: (if $u == "" then "false" else "true" end)} + (if $u == "" then {} else {user: $u, password: $w} end))}' \
+      | kch update "realms/$R" -f - >/dev/null && ok "E-mail voor Keycloak via $host; 'Wachtwoord of authenticator kwijt?' staat aan"
+    kch update "realms/$R" -s emailTheme=oa >/dev/null 2>&1 || waarschuw "Het e-mailthema 'oa' zetten lukte niet; de herstelmail gebruikt de standaardtekst."
+    # De link toont de QR-code opnieuw; de oude koppeling blijft (zie boven).
+    rf="$(kch get "realms/$R" --fields resetCredentialsFlow 2>/dev/null | jq -r '.resetCredentialsFlow')"
+    ex="$(kch get "authentication/flows/$(jq -rn --arg f "$rf" '$f|@uri')/executions" -r $R 2>/dev/null)"
+    id="$(jq -r '[.[] | select(.providerId == "reset-otp")][0].id // empty' <<<"$ex")"
+    cfg="$(jq -r '[.[] | select(.providerId == "reset-otp")][0].authenticationConfig // empty' <<<"$ex")"
+    if [ -z "$id" ]; then
+      waarschuw "De herstelflow '$rf' heeft geen stap 'Reset OTP': de link geeft dan alleen een nieuw wachtwoord."
+    elif [ -n "$cfg" ]; then
+      kch update "authentication/config/$cfg" -r $R -b '{"alias":"oa-reset-otp","config":{"action_on_otp_reset_flag":"Remove none"}}' >/dev/null \
+        && ok "De herstellink toont de QR-code opnieuw"
+    else
+      kch create "authentication/executions/$id/config" -r $R -b '{"alias":"oa-reset-otp","config":{"action_on_otp_reset_flag":"Remove none"}}' >/dev/null 2>&1 \
+        && ok "De herstellink toont de QR-code opnieuw"
+    fi
+  else
+    kch update "realms/$R" -s resetPasswordAllowed=false >/dev/null
+    waarschuw "Keycloak heeft geen e-mail: 'Wachtwoord of authenticator kwijt?' staat uit. Zet het aan met: sudo $OA_UITROL/server/inlog.sh smtp"
+  fi
+
+  # Bestaande gebruikers met een app maar zonder herstelcodes: bij de volgende inlog.
+  local n=0 u
+  while read -r u; do
+    [ -n "$u" ] || continue
+    local soorten acties
+    soorten="$(kch get "users/$u/credentials" -r $R 2>/dev/null | jq -r '[.[].type] | join(",")')"
+    [[ ",$soorten," == *",otp,"* && ",$soorten," != *",recovery-authn-codes,"* ]] || continue
+    acties="$(kch get "users/$u" -r $R --fields requiredActions 2>/dev/null | jq -c '(.requiredActions // []) + ["CONFIGURE_RECOVERY_AUTHN_CODES"] | unique')"
+    kch update "users/$u" -r $R -s "requiredActions=$acties" >/dev/null && n=$((n + 1))
+  done < <(kch get users -r $R --fields id -q max=2000 2>/dev/null | jq -r '.[].id')
+  [ "$n" -gt 0 ] && ok "$n gebruiker(s) maken bij hun volgende inlog herstelcodes aan"
+  kc_klaar
+}
+
+# kc_authenticator_opnieuw <compose> <e-mailadres>: haalt de authenticator-app en de
+# herstelcodes van een gebruiker weg en meldt hem af; bij de volgende inlog (na het
+# wachtwoord) verschijnt de QR-code opnieuw, daarna nieuwe herstelcodes.
+kc_authenticator_opnieuw() {
+  local compose="$1" email="${2,,}" R=gemeenten u cred n=0 acties
+  kc_verbind "$compose" || stop "Inloggen op Keycloak lukte niet."
+  command -v jq >/dev/null || apt-get install -y -qq jq >/dev/null
+  u="$(kch get users -r $R -q email="$email" -q exact=true --fields id 2>/dev/null | jq -r '.[0].id // empty')"
+  [ -n "$u" ] || { kc_klaar; stop "Geen gebruiker met e-mailadres $email."; }
+  while read -r cred; do
+    [ -n "$cred" ] || continue
+    kch delete "users/$u/credentials/$cred" -r $R >/dev/null && n=$((n + 1))
+  done < <(kch get "users/$u/credentials" -r $R 2>/dev/null | jq -r '.[] | select(.type == "otp" or .type == "recovery-authn-codes") | .id')
+  acties="$(kch get "users/$u" -r $R --fields requiredActions 2>/dev/null | jq -c '(.requiredActions // []) - ["CONFIGURE_RECOVERY_AUTHN_CODES"] + ["CONFIGURE_TOTP"] | unique')"
+  kch update "users/$u" -r $R -s "requiredActions=$acties" >/dev/null
+  kch create "users/$u/logout" -r $R >/dev/null 2>&1 || true
+  kc_klaar
+  ok "$email: $n koppeling(en) weggehaald en afgemeld. Bij de volgende inlog verschijnt na het wachtwoord de QR-code."
+}
+
 geldig_domein() { [[ "$1" =~ ^([a-z0-9]([a-z0-9-]*[a-z0-9])?\.)+[a-z]{2,}$ ]]; }
 geldig_ip()     { [[ "$1" =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}$ ]]; }
 geldige_wg()    { [[ "$1" =~ ^[A-Za-z0-9+/]{42}[AEIMQUYcgkosw048]=$ ]]; }

@@ -12,6 +12,8 @@ Het inlogscherm van Keycloak in de stijl van de OA-panelen: dezelfde kop (icoon,
   
   Bij een nieuwe versie van die pakketten draai je `./bouw-css.sh` (Node.js 20+); de uitkomst staat in git.
 - `oa/login/messages/`: eigen teksten in het Nederlands en Engels. De rest komt uit Keycloak.
+- `oa/login/login-otp.ftl`: eigen versie van de pagina voor de code uit de app. Bij meer gekoppelde apps staat de laatst gekoppelde voorgeselecteerd, met uitleg (zie `docs/inloggen-herstel.md`).
+- `oa/email/`: e-mailthema met een eigen herstelmail ("Wachtwoord of authenticator kwijt?"); de rest uit Keycloak.
 - De integratielaag stuurt `ui_locales=nl` mee (of `?taal=en` op `/api/auth/login`). Anders volgt Keycloak de taal van de zijbalk, en die is vaak Engels.
 
 ## Huisstijl
