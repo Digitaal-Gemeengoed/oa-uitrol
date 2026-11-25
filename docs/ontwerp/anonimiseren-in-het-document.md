@@ -1,11 +1,11 @@
 # Office Assistent — anonimiseren in het document (ontwerp)
 
-*Prototype Digitaal GemeenGoed · 9 november 2026 · besluiten van Erik Hoekstra*
+*Prototype Digitaal GemeenGoed · 9 november 2026, aangevuld 25 november 2026 · besluiten van Erik Hoekstra*
 
 ## Uitgangspunten (besloten)
 
 1. Anonimiseren gebeurt in het document zelf (het hoofdvenster), zoals in de MIRA-demo: plaatshouders verschijnen al tijdens de voorvertoning in de tekst, gekleurd per PPL-niveau en gestippeld zolang het een voorvertoning is.
-2. Originele waarden staan alleen in de lijst in het paneel van de assistent (volgens het PPL-niveau van wie kijkt), nooit terug in het document. Zo zet AutoSave geen persoonsgegevens in een nieuwe versie.
+2. Originele waarden staan alleen in de lijst in het paneel van de assistent (volgens het PPL-niveau van wie kijkt), nooit terug in het document. Zo zet AutoSave geen persoonsgegevens in een nieuwe versie. Uitzondering (25 november): in LibreOffice Writer kan de gebruiker de originelen binnen het eigen niveau tijdelijk in de tekst tonen, mits opslaan, exporteren en afdrukken dan uitgeschakeld zijn (zie *Na het bevestigen*).
 3. Anonimiseren leidt tot een nieuwe versie. Het origineel wordt eerst als versie vastgelegd; de assistent toont de versies met hun soort.
 4. Het versienummer komt in de documenteigenschappen (eigenschap `Versie`; een veld in de koptekst kan die tonen). Het nummer is dat van het platform.
 5. Terug naar het origineel: per gegeven volgens het PPL-niveau van de categorie; het hele document alleen met PPL 3 en een reden, als nieuwe versie.
@@ -19,6 +19,29 @@
 3. **Paneel.** Per gegeven een kaart: plaatshouder, PPL, AVG-artikel, algoritme, sleutel, origineel (volgens niveau), "Toon in document".
 4. **Bevestigen.** Register definitief; versie N+1 (soort *anonimisering*, bron N); markering wordt vast.
 5. **Terug.** Per gegeven of het hele document (zie boven); altijd als nieuwe versie.
+
+## Na het bevestigen
+
+*Aanvulling 25 november 2026.*
+
+- **De lijst blijft.** Na Bevestigen blijven de kaarten staan, met status *bevestigd*.
+- **Herkennen bij openen.** Opent iemand een al geanonimiseerd document en start de assistent, dan leest `anonimiseren.hervat()` de plaatshouders in het document. Staan die in het register van het stuk (`GET /objecten/:id/pii`), dan bouwt de assistent de lijst daaruit op, ook als er geen voorvertoningen meer zijn.
+- **Originelen in de lijst.** *Originelen tonen* vraagt in één verzoek (`POST /objecten/:id/pii/onthul`) de waarden van alle gegevens binnen het niveau van de gebruiker op. Het platform controleert het niveau opnieuw en legt het inzien vast (`pii.ingezien`). Gegevens boven dat niveau blijven zonder waarde; de kaart noemt het benodigde niveau.
+- **Originelen in de tekst** (alleen LibreOffice Writer; adapter `toonPiiOriginelen`). Voorwaarden en werking:
+
+| Onderdeel | Uitwerking |
+|---|---|
+| Voorwaarde | Het document is opgeslagen en ongewijzigd, en er staat geen voorvertoning open. |
+| Alleen-lezen | Het document gaat op alleen-lezen (*Document bewerken* uit); typen kan niet. |
+| Niet gewijzigd | Het document wordt niet als gewijzigd gemarkeerd (`disableSetModified`): geen herstelkopie, geen vraag om op te slaan bij sluiten. |
+| Opdrachten | Een dispatch-interceptor maakt Opslaan, Opslaan als, Exporteren (ook PDF), Afdrukken, Mailen, Ondertekenen, Opnieuw laden en *Document bewerken* grijs en laat ze niets doen. |
+| Vangnet | Wordt het document toch opgeslagen of gekopieerd (macro, API), dan gaan bij `OnSave`/`OnSaveAs`/`OnCopyTo` eerst de plaatshouders terug, en na afloop weer de originelen. |
+| Ongedaan maken | De wissel staat niet in de ongedaan-maken-lijst. |
+| Herkenbaar | De originelen staan onderstippeld; opmerkingen houden hun plaatshouders. |
+| De assistent | Zolang de originelen in de tekst staan, weigert de brug het lezen en wijzigen van het document; het paneel zet de overige handelingen stil. |
+| Terug | *Plaatshouders terug in de tekst*, het verlaten van het tabblad of het sluiten van de assistent zet de plaatshouders terug en heft het alleen-lezen op. |
+
+Word en Collabora tonen de originelen alleen in de lijst: daar is opslaan niet betrouwbaar uit te zetten (AutoSave, gedeelde bewerking).
 
 ## Platform
 
