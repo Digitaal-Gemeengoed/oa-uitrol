@@ -1,11 +1,15 @@
 # Wijzigingen
 
+## 0.37.1 — 2026-11-25
+
+- Werkplaats: opendop-mini 0.20.1 en oa-services 0.7.3 vragen oa-contract 0.16.0. In 0.37.0 vroegen ze nog `^0.15.0`, waardoor `npm ci` het contract in de openbare registry zocht en het bouwen op VPS 1 stopte.
+
 ## 0.37.0 — 2026-11-25
 
 **Geanonimiseerde gegevens in beeld houden.** Ontwerp: `docs/ontwerp/anonimiseren-in-het-document.md`.
 - De lijst met geanonimiseerde gegevens blijft na Bevestigen staan; een al geanonimiseerd document wordt bij het openen herkend en de lijst wordt uit het register opgehaald.
 - De originele waarden binnen het eigen niveau (PPL) in de lijst, en in LibreOffice Writer desgewenst ook tijdelijk in de tekst, met het document op alleen-lezen en opslaan, exporteren en afdrukken uitgeschakeld.
-- Werkplaats: oa-contract 0.16.0, oa-kern 0.16.0, oa-paneel 0.24.0, oa-adapters 0.24.0 (LibreOffice-extensie 0.19.0), oa-integratielaag 0.15.1.
+- Werkplaats: oa-contract 0.16.0, oa-kern 0.16.0, oa-paneel 0.24.0, oa-adapters 0.24.0 (LibreOffice-extensie 0.19.0), oa-integratielaag 0.15.1, opendop-mini 0.20.1, oa-services 0.7.3.
 - Uitrollen: `bijwerken.sh` op VPS 1; daarna de LibreOffice-extensie 0.19.0 opnieuw installeren.
 
 ## 0.36.0 — 2026-11-25
