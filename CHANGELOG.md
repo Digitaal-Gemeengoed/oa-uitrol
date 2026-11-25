@@ -1,5 +1,9 @@
 # Wijzigingen
 
+## 0.37.2 — 2026-11-25
+
+- Toegankelijkheidscontrole (oa-wcag 0.1.1): de plaatshouders van de anonimisering gelden niet meer als "gekleurde tekst zonder extra visuele aanduiding" (WCAG 1.4.1). Uitrollen: `bijwerken.sh` op VPS 3.
+
 ## 0.37.1 — 2026-11-25
 
 - Werkplaats: opendop-mini 0.20.1 en oa-services 0.7.3 vragen oa-contract 0.16.0. In 0.37.0 vroegen ze nog `^0.15.0`, waardoor `npm ci` het contract in de openbare registry zocht en het bouwen op VPS 1 stopte.
