@@ -1,5 +1,10 @@
 # Wijzigingen
 
+## 0.39.2 — 2026-11-26
+
+- `inlog.sh portaal` (VPS 3): loopt de rechten van het beheerportaal in Keycloak na (service-account en zijn rollen, fijnmazige beheerrechten, het beleid en de drie toestemmingen met hun rollen, het adres voor het uitlogbericht) en zet ze desgewenst opnieuw, zoals `bijwerken.sh` doet.
+- oa-beheer 0.21.1: duidelijkere melding als Keycloak een handeling weigert. Uitrollen: `bijwerken.sh` op VPS 1.
+
 ## 0.39.1 — 2026-11-26
 
 - oa-beheer 0.21.0: uitnodiging opnieuw sturen, met de mail van Keycloak als het inlogaccount nog niet is ingesteld. Uitrollen: `bijwerken.sh` op VPS 1.

@@ -670,6 +670,55 @@ keycloak_herstel() {
 # kc_authenticator_opnieuw <compose> <e-mailadres>: haalt de authenticator-app en de
 # herstelcodes van een gebruiker weg en meldt hem af; bij de volgende inlog (na het
 # wachtwoord) verschijnt de QR-code opnieuw, daarna nieuwe herstelcodes.
+# De rechten van het beheerportaal in Keycloak nalopen (inlog.sh portaal): wat
+# keycloak_gemeenten zet voor de pagina's Gemeenten en Medewerkers, en het
+# uitlogbericht naar de integratielaag. Geeft 0 als alles er is.
+kc_portaal_status() {
+  local compose="$1" R=gemeenten fout=0 b sa rollen ap pol perms naam rs il url
+  kc_verbind "$compose" || stop "Inloggen op Keycloak lukte niet."
+  command -v jq >/dev/null || apt-get install -y -qq jq >/dev/null
+  b="$(kch get clients -r $R -q clientId=oa-beheer --fields id,serviceAccountsEnabled 2>/dev/null | jq -c '.[0] // empty')"
+  if [ -z "$b" ]; then waarschuw "Client oa-beheer ontbreekt in de realm $R."; kc_klaar; return 1; fi
+  [ "$(echo "$b" | jq -r .serviceAccountsEnabled)" = true ] && ok "Service-account van het portaal staat aan" || { waarschuw "Service-account van het portaal staat uit"; fout=1; }
+  sa="$(kch get "clients/$(echo "$b" | jq -r .id)/service-account-user" -r $R 2>/dev/null | jq -r '.id // empty')"
+  rollen="$( [ -n "$sa" ] && kch get "users/$sa/role-mappings" -r $R 2>/dev/null | jq -r '[.clientMappings."realm-management".mappings[]?.name] | join(", ")')"
+  for naam in manage-organizations view-users; do
+    [[ ", $rollen, " == *", $naam, "* ]] && ok "Rol $naam" || { waarschuw "Rol $naam ontbreekt (realm-management)"; fout=1; }
+  done
+  if [ "$(kch get "realms/$R" 2>/dev/null | jq -r '.adminPermissionsEnabled // false')" = true ]; then
+    ok "Fijnmazige beheerrechten staan aan"
+  else
+    waarschuw "Fijnmazige beheerrechten staan uit (realm $R, adminPermissionsEnabled)"; fout=1
+  fi
+  ap="$(kch get clients -r $R -q clientId=admin-permissions --fields id 2>/dev/null | jq -r '.[0].id // empty')"
+  if [ -n "$ap" ]; then
+    pol="$(kch get "clients/$ap/authz/resource-server/policy" -r $R 2>/dev/null | jq -r '[.[] | select(.name=="oa-beheer-portaal")][0].id // empty')"
+    [ -n "$pol" ] && ok "Beleid oa-beheer-portaal" || { waarschuw "Beleid oa-beheer-portaal ontbreekt"; fout=1; }
+    perms="$(kch get "clients/$ap/authz/resource-server/permission" -r $R 2>/dev/null)"
+    for naam in "oa-beheer: rollen toekennen" "oa-beheer: gebruikers beheren" "oa-beheer: alleen medewerker- en ppl-rollen"; do
+      local id; id="$(echo "$perms" | jq -r --arg n "$naam" '[.[] | select(.name==$n)][0].id // empty')"
+      if [ -z "$id" ]; then waarschuw "Toestemming '$naam' ontbreekt"; fout=1; continue; fi
+      if [ "$naam" = "oa-beheer: alleen medewerker- en ppl-rollen" ]; then
+        # De rollen staan er als id; vertaal ze naar namen.
+        local alle; alle="$(kch get roles -r $R 2>/dev/null | jq -c 'map({(.id): .name}) | add // {}')"
+        rs="$(kch get "clients/$ap/authz/resource-server/permission/$id/resources" -r $R 2>/dev/null \
+          | jq -r --argjson n "$alle" '[.[].name | ($n[.] // .)] | sort | join(", ")')"
+        [ "$rs" = "medewerker, ppl-1, ppl-2, ppl-3" ] && ok "Toestemming '$naam' ($rs)" || { waarschuw "Toestemming '$naam' geldt voor: ${rs:-niets}"; fout=1; }
+      else
+        ok "Toestemming '$naam'"
+      fi
+    done
+    echo "$perms" | jq -e '.[] | select(.name=="oa-beheer: alleen ppl-rollen")' >/dev/null && { waarschuw "Oude toestemming 'oa-beheer: alleen ppl-rollen' staat er nog"; fout=1; }
+  else
+    waarschuw "Client admin-permissions ontbreekt (fijnmazige beheerrechten)"; fout=1
+  fi
+  il="$(kch get clients -r $R -q clientId=oa-integratielaag --fields id 2>/dev/null | jq -r '.[0].id // empty')"
+  url="$( [ -n "$il" ] && kch get "clients/$il" -r $R 2>/dev/null | jq -r '.attributes."backchannel.logout.url" // empty')"
+  [ -n "$url" ] && ok "Uitlogbericht naar $url" || { waarschuw "Geen adres voor het uitlogbericht op oa-integratielaag"; fout=1; }
+  kc_klaar
+  return $fout
+}
+
 kc_authenticator_opnieuw() {
   local compose="$1" email="${2,,}" R=gemeenten u cred n=0 acties
   kc_verbind "$compose" || stop "Inloggen op Keycloak lukte niet."

@@ -7,6 +7,8 @@
 #   sudo /opt/oa-uitrol/server/inlog.sh authenticator <e-mail>    authenticator-app en herstelcodes van
 #                                                                 één gebruiker weghalen; bij de volgende
 #                                                                 inlog ziet hij na het wachtwoord de QR-code
+#   sudo /opt/oa-uitrol/server/inlog.sh portaal                   rechten van het beheerportaal in Keycloak
+#                                                                 nalopen, en zo nodig opnieuw zetten
 #   sudo /opt/oa-uitrol/server/inlog.sh status                    wat er aan staat
 #
 # Herstelcodes en de rest stelt bijwerken.sh in (keycloak_herstel in lib.sh).
@@ -72,6 +74,23 @@ case "${1:-}" in
     echo
     ;;
 
+  portaal)
+    meld "Rechten van het beheerportaal in Keycloak (pagina's Gemeenten en Medewerkers)"
+    if kc_portaal_status "$COMPOSE"; then
+      ok "Alles staat goed"
+    else
+      echo
+      read -r -p "  Opnieuw zetten (zoals bijwerken.sh doet)? [j/N] " J
+      if [[ "$J" =~ ^[jJ]$ ]]; then
+        keycloak_gemeenten "$COMPOSE"
+        echo
+        meld "Opnieuw nagelopen"
+        kc_portaal_status "$COMPOSE" && ok "Alles staat goed" || waarschuw "Nog niet alles staat goed; stuur deze uitvoer door."
+      fi
+    fi
+    echo
+    ;;
+
   status|"")
     meld "Herstel bij inloggen"
     if [ -n "$(waarde KC_SMTP_HOST)" ]; then
@@ -81,11 +100,11 @@ case "${1:-}" in
     fi
     ok "Herstelcodes en de beheeropdracht 'authenticator' zijn altijd beschikbaar"
     echo
-    echo "  Gebruik: sudo $0 smtp | authenticator <e-mailadres> | status"
+    echo "  Gebruik: sudo $0 smtp | authenticator <e-mailadres> | portaal | status"
     echo
     ;;
 
   *)
-    stop "Onbekende opdracht '$1'. Gebruik: smtp, authenticator <e-mailadres> of status."
+    stop "Onbekende opdracht '$1'. Gebruik: smtp, authenticator <e-mailadres>, portaal of status."
     ;;
 esac
