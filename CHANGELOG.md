@@ -1,5 +1,15 @@
 # Wijzigingen
 
+## 0.39.0 — 2026-11-26
+
+**Medewerkers beheren in het beheerportaal** (oa-beheer 0.20.0). Ontwerp: `docs/ontwerp/medewerkers-beheren.md`.
+- `bijwerken.sh` op VPS 3 breidt de fijnmazige rechten van het service-account van het portaal uit: gebruikers beheren (aanmaken, in- en uitschakelen, mails laten sturen, sessies beëindigen), en daarbij alleen de rollen `medewerker`, `ppl-1`, `ppl-2` en `ppl-3` toekennen. Beheerrollen en de instellingen van de realm blijven buiten bereik (getest tegen Keycloak 26.8.2). Een bestaande inrichting wordt bijgewerkt.
+- `bijwerken.sh` op VPS 3 zet op de client `oa-integratielaag` het adres voor het uitlogbericht (Back-Channel Logout, oa-integratielaag 0.16.0): uitloggen, uitschakelen of een ander niveau geldt direct in de Office Assistent.
+- E-mailthema `oa`: eigen tekst voor de mail om het account in te stellen (nieuwe medewerker, herstelmail vanuit het portaal), Nederlands en Engels.
+- `INRICHTING.md` en `docs/inloggen-herstel.md` bijgewerkt.
+- Werkplaats: oa-integratielaag 0.16.0.
+- Uitrollen: `bijwerken.sh` op VPS 3 (Keycloak, thema en portaal), daarna op VPS 1 (integratielaag). Keycloak moet mail kunnen versturen (`inlog.sh smtp` op VPS 3).
+
 ## 0.38.0 — 2026-11-26
 
 **Het PPL-niveau van medewerkers instellen in het beheerportaal** (oa-beheer 0.19.0, pagina Medewerkers).

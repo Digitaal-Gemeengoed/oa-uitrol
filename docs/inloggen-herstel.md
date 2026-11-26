@@ -37,6 +37,10 @@ De QR-code komt nooit terug op alleen het wachtwoord. Wie alleen het wachtwoord 
 - **Bescherming tegen raden** staat aan: na tien mislukte pogingen (wachtwoord, code of herstelcode) steeds langer wachten, tot vijftien minuten. Geen permanente blokkade.
 - **E-mailadres en gebruikersnaam** zijn alleen door een beheerder te wijzigen. De herstellink gaat naar dat adres, en het e-maildomein bepaalt bij welke gemeente iemand hoort (multi-tenant). Voorheen kon een gebruiker zijn adres in het account zelf wijzigen.
 
+## Vanuit het beheerportaal
+
+Op de pagina **Medewerkers** laat een beheerder (recht `medewerkers.manage`) Keycloak een mail sturen om het wachtwoord en/of de authenticator opnieuw in te stellen (*execute actions*, eigen tekst in het e-mailthema `oa`, link drie dagen geldig). Een nieuwe authenticator komt naast de oude; dat is dezelfde keuze als bij *Remove none* hierboven. Een nieuwe medewerker krijgt dezelfde mail, met beide stappen. De mail gaat altijd naar het adres dat al in Keycloak staat; een beheerder kan dat adres in het portaal niet wijzigen. Kan iemand niet meer bij die mailbox, dan is de beheeropdracht hieronder nodig, met dezelfde controle van wie het vraagt.
+
 ## De beheeropdracht
 
 `sudo /opt/oa-uitrol/server/inlog.sh authenticator <e-mailadres>` (VPS 3) haalt de app(s) en herstelcodes van die gebruiker weg, meldt hem overal af en zet de verplichte stap *Configure OTP*. Bij de volgende inlog ziet hij na het wachtwoord de QR-code, daarna nieuwe herstelcodes. Doe dit alleen als vaststaat dat de vraag van de gebruiker zelf komt (bijvoorbeeld via een bekend telefoonnummer of persoonlijk): wie dit laat doen, heeft daarna alleen het wachtwoord nodig.
