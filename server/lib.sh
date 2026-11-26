@@ -403,13 +403,16 @@ keycloak_gemeenten() {
       fi
       ids="$(for rol in medewerker ppl-1 ppl-2 ppl-3; do kcg get "roles/$rol" -r $R --fields id 2>/dev/null | jq -r '.id // empty'; done | jq -R . | jq -sc 'map(select(length>0))')"
       # Eén toestemming zetten: bestaat ze (ook onder een oude naam), dan bijwerken.
+      # Lukt het niet, dan de melding van Keycloak tonen (anders blijft de oorzaak onzichtbaar).
       kc_toestemming() {
-        local naam="$1" oud="$2" lichaam="$3" id
+        local naam="$1" oud="$2" lichaam="$3" id uit
         id="$(kcg get "clients/$ap/authz/resource-server/permission" -r $R 2>/dev/null | jq -r --arg n "$naam" --arg o "$oud" '[.[] | select(.name==$n or .name==$o)][0].id // empty')"
         if [ -n "$id" ]; then
-          echo "$lichaam" | jq -c --arg id "$id" '. + {id:$id}' | kcg update "clients/$ap/authz/resource-server/permission/scope/$id" -r $R -f - >/dev/null 2>&1
+          uit="$(echo "$lichaam" | jq -c --arg id "$id" '. + {id:$id}' | kcg update "clients/$ap/authz/resource-server/permission/scope/$id" -r $R -f - 2>&1)" \
+            || waarschuw "Toestemming '$naam' bijwerken lukte niet: $(echo "$uit" | tr '\n' ' ' | cut -c1-300)"
         else
-          echo "$lichaam" | kcg create "clients/$ap/authz/resource-server/permission/scope" -r $R -f - >/dev/null 2>&1
+          uit="$(echo "$lichaam" | kcg create "clients/$ap/authz/resource-server/permission/scope" -r $R -f - 2>&1)" \
+            || waarschuw "Toestemming '$naam' aanmaken lukte niet: $(echo "$uit" | tr '\n' ' ' | cut -c1-300)"
         fi
       }
       if [ -n "$pol" ] && [ "$(echo "$ids" | jq length)" = 4 ]; then
@@ -677,6 +680,7 @@ kc_portaal_status() {
   local compose="$1" R=gemeenten fout=0 b sa rollen ap pol perms naam rs il url
   kc_verbind "$compose" || stop "Inloggen op Keycloak lukte niet."
   command -v jq >/dev/null || apt-get install -y -qq jq >/dev/null
+  echo "  Keycloak $(kch get serverinfo -r master 2>/dev/null | jq -r '.systemInfo.version // "?"')"
   b="$(kch get clients -r $R -q clientId=oa-beheer --fields id,serviceAccountsEnabled 2>/dev/null | jq -c '.[0] // empty')"
   if [ -z "$b" ]; then waarschuw "Client oa-beheer ontbreekt in de realm $R."; kc_klaar; return 1; fi
   [ "$(echo "$b" | jq -r .serviceAccountsEnabled)" = true ] && ok "Service-account van het portaal staat aan" || { waarschuw "Service-account van het portaal staat uit"; fout=1; }

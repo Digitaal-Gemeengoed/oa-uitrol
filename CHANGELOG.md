@@ -1,5 +1,10 @@
 # Wijzigingen
 
+## 0.39.3 — 2026-11-26
+
+- `keycloak_gemeenten` (en daarmee `bijwerken.sh` en `inlog.sh portaal` op VPS 3): lukt het aanmaken of bijwerken van een toestemming voor het beheerportaal niet, dan staat de melding van Keycloak in de uitvoer. Voorheen werd die weggegooid, waardoor alleen "ontbreekt" zichtbaar was.
+- `inlog.sh portaal` toont de versie van de draaiende Keycloak.
+
 ## 0.39.2 — 2026-11-26
 
 - `inlog.sh portaal` (VPS 3): loopt de rechten van het beheerportaal in Keycloak na (service-account en zijn rollen, fijnmazige beheerrechten, het beleid en de drie toestemmingen met hun rollen, het adres voor het uitlogbericht) en zet ze desgewenst opnieuw, zoals `bijwerken.sh` doet.
