@@ -1,5 +1,10 @@
 # Wijzigingen
 
+## 0.39.1 — 2026-11-26
+
+- oa-beheer 0.21.0: uitnodiging opnieuw sturen, met de mail van Keycloak als het inlogaccount nog niet is ingesteld. Uitrollen: `bijwerken.sh` op VPS 1.
+- Correctie in de uitrolstappen van 0.38.0 en 0.39.0: het beheerportaal draait op VPS 1, niet op VPS 3. De volgorde (eerst VPS 3, dan VPS 1) blijft gelijk.
+
 ## 0.39.0 — 2026-11-26
 
 **Medewerkers beheren in het beheerportaal** (oa-beheer 0.20.0). Ontwerp: `docs/ontwerp/medewerkers-beheren.md`.
@@ -8,7 +13,7 @@
 - E-mailthema `oa`: eigen tekst voor de mail om het account in te stellen (nieuwe medewerker, herstelmail vanuit het portaal), Nederlands en Engels.
 - `INRICHTING.md` en `docs/inloggen-herstel.md` bijgewerkt.
 - Werkplaats: oa-integratielaag 0.16.0.
-- Uitrollen: `bijwerken.sh` op VPS 3 (Keycloak, thema en portaal), daarna op VPS 1 (integratielaag). Keycloak moet mail kunnen versturen (`inlog.sh smtp` op VPS 3).
+- Uitrollen: `bijwerken.sh` op VPS 3 (Keycloak en thema), daarna op VPS 1 (portaal en integratielaag). Keycloak moet mail kunnen versturen (`inlog.sh smtp` op VPS 3).
 
 ## 0.38.0 — 2026-11-26
 
@@ -16,7 +21,7 @@
 - `bijwerken.sh` op VPS 3 zet in de realm `gemeenten` de fijnmazige beheerrechten aan en geeft het service-account van het portaal één recht: bij gebruikers de rollen `ppl-1`, `ppl-2` en `ppl-3` toekennen en weghalen. Andere rollen toekennen, gebruikers wijzigen of sessies beëindigen kan het portaal niet (getest tegen Keycloak 26.8.2).
 - Ook de maker van een geanonimiseerd stuk ziet na het bevestigen alleen de originelen binnen zijn eigen niveau (oa-paneel 0.24.1, oa-kern 0.16.1).
 - `INRICHTING.md`: niveau wijzigen via het portaal.
-- Uitrollen: `bijwerken.sh` op VPS 3 (Keycloak en het portaal), daarna op VPS 1 (de werkplaats). Geef daarna in het portaal bij **Groepen** de rechten Medewerkers (PPL-niveau) aan wie het niveau mag beheren.
+- Uitrollen: `bijwerken.sh` op VPS 3 (Keycloak), daarna op VPS 1 (portaal en werkplaats). Geef daarna in het portaal bij **Groepen** de rechten Medewerkers (PPL-niveau) aan wie het niveau mag beheren.
 
 ## 0.37.3 — 2026-11-25
 
