@@ -1,5 +1,9 @@
 # Wijzigingen
 
+## 0.39.5 — 2026-11-26
+
+- `keycloak_gemeenten` (`bijwerken.sh` op VPS 3) maakt de rollen `medewerker`, `ppl-1`, `ppl-2` en `ppl-3` aan als ze ontbreken, met dezelfde omschrijving als in `keycloak/realm-gemeenten.json`. Een realm die is aangemaakt vóór de PPL-rollen had ze niet (alleen `keycloak-beheer.sh` maakte ze aan); daardoor had iedereen PPL 0 en konden de toestemmingen voor het beheerportaal niet worden gezet. Het niveau per medewerker zet de beheerder daarna in het portaal (pagina Medewerkers); er wordt niemand automatisch een niveau gegeven.
+
 ## 0.39.4 — 2026-11-26
 
 - `keycloak_gemeenten` (`bijwerken.sh` en `inlog.sh portaal` op VPS 3): het deel dat de rechten van het beheerportaal zet, stopte op VPS 3 zonder melding halverwege, waardoor de toestemmingen nooit werden aangemaakt en ook de rest van `bijwerken.sh` (koppelen van gemeenten, herstel bij inloggen) niet meer liep. Oorzaak: een mislukte kcadm-opdracht waarvan de uitvoer werd weggegooid, onder `set -e`. Nu is elke stap foutbestendig; mislukt er een, dan staat de melding van Keycloak in de uitvoer en gaat het script verder. De fijnmazige beheerrechten worden alleen aangezet als ze nog uit staan.

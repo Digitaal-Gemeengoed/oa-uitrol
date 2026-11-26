@@ -407,6 +407,24 @@ keycloak_gemeenten() {
           || waarschuw "Beleid oa-beheer-portaal aanmaken lukte niet: $(echo "$uit" | tr '\n' ' ' | cut -c1-300)"
         pol="$(kcg get "clients/$ap/authz/resource-server/policy" -r $R 2>/dev/null | jq -r '[.[] | select(.name=="oa-beheer-portaal")][0].id // empty' || true)"
       fi
+      # De rollen horen bij het model (zie keycloak/realm-gemeenten.json); een
+      # realm van vóór de PPL-rollen krijgt ze hier. Het niveau per medewerker
+      # zet de beheerder daarna in het portaal (pagina Medewerkers).
+      local omschrijving
+      for rol in medewerker ppl-1 ppl-2 ppl-3; do
+        kcg get "roles/$rol" -r $R >/dev/null 2>&1 && continue
+        case "$rol" in
+          medewerker) omschrijving="Werkt met de assistent in de werkomgeving" ;;
+          ppl-1) omschrijving="Mag gewone persoonsgegevens inzien (AVG art. 6) achter plaatshouders." ;;
+          ppl-2) omschrijving="Mag ook bijzondere persoonsgegevens inzien (AVG art. 9)." ;;
+          ppl-3) omschrijving="Mag ook strafrechtelijke gegevens inzien (AVG art. 10) en versies van vóór het anonimiseren." ;;
+        esac
+        if uit="$(kcg create roles -r $R -s name="$rol" -s "description=$omschrijving" 2>&1)"; then
+          ok "Rol $rol aangemaakt"
+        else
+          waarschuw "Rol $rol aanmaken lukte niet: $(echo "$uit" | tr '\n' ' ' | cut -c1-300)"
+        fi
+      done
       ids="$(for rol in medewerker ppl-1 ppl-2 ppl-3; do kcg get "roles/$rol" -r $R --fields id 2>/dev/null | jq -r '.id // empty' || true; done | jq -R . | jq -sc 'map(select(length>0))' || echo '[]')"
       perms="$(kcg get "clients/$ap/authz/resource-server/permission" -r $R 2>&1)" || {
         waarschuw "Toestemmingen lezen lukte niet: $(echo "$perms" | tr '\n' ' ' | cut -c1-300)"; perms='[]'; }
@@ -427,7 +445,7 @@ keycloak_gemeenten() {
       if [ -z "$pol" ]; then
         waarschuw "Zonder beleid oa-beheer-portaal geen toestemmingen voor het portaal."
       elif [ "$(echo "$ids" | jq length)" != 4 ]; then
-        waarschuw "Rollen medewerker en ppl-1 tot ppl-3 ontbreken (gevonden: $(echo "$ids" | jq length) van 4); draai keycloak-beheer.sh en daarna dit opnieuw."
+        waarschuw "Rollen medewerker en ppl-1 tot ppl-3 ontbreken nog (gevonden: $(echo "$ids" | jq length) van 4); zie de meldingen hierboven."
       else
         kc_toestemming "oa-beheer: rollen toekennen" "" \
           "$(jq -cn --arg p "$pol" '{name:"oa-beheer: rollen toekennen", resourceType:"Users", scopes:["map-roles"], policies:[$p], decisionStrategy:"UNANIMOUS"}')"
