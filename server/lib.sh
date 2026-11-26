@@ -369,6 +369,40 @@ keycloak_gemeenten() {
     adminscope="$(kcg get client-scopes -r $R --fields id,name 2>/dev/null | jq -r '.[] | select(.name=="kc-admin-api") | .id')"
     [ -n "$adminscope" ] && kcg update "clients/$beheer/default-client-scopes/$adminscope" -r $R >/dev/null 2>&1
     ok "Beheerportaal mag gemeenten aanmaken (service-account: manage-organizations, view-users)"
+
+    # Het PPL-niveau van medewerkers (pagina Medewerkers): fijnmazige
+    # beheerrechten (Keycloak 26.2+). Het service-account mag bij gebruikers
+    # alleen rollen toekennen, en dan alleen ppl-1, ppl-2 en ppl-3. Andere
+    # rollen, gebruikersgegevens of sessies blijven buiten bereik.
+    local ap pol rol ids
+    kcg update "realms/$R" -s adminPermissionsEnabled=true >/dev/null 2>&1
+    ap="$(kcg get clients -r $R -q clientId=admin-permissions --fields id 2>/dev/null | jq -r '.[0].id // empty')"
+    if [ -z "$ap" ]; then
+      waarschuw "Keycloak kent geen fijnmazige beheerrechten (admin-permissions); het portaal kan het PPL-niveau niet wijzigen."
+    else
+      pol="$(kcg get "clients/$ap/authz/resource-server/policy" -r $R -q name=oa-beheer-portaal 2>/dev/null | jq -r '[.[] | select(.name=="oa-beheer-portaal")][0].id // empty')"
+      if [ -z "$pol" ]; then
+        jq -cn --arg c "$beheer" '{name:"oa-beheer-portaal", description:"Het service-account van het beheerportaal", clients:[$c], logic:"POSITIVE"}' \
+          | kcg create "clients/$ap/authz/resource-server/policy/client" -r $R -f - >/dev/null 2>&1
+        pol="$(kcg get "clients/$ap/authz/resource-server/policy" -r $R -q name=oa-beheer-portaal 2>/dev/null | jq -r '[.[] | select(.name=="oa-beheer-portaal")][0].id // empty')"
+      fi
+      ids="$(for rol in ppl-1 ppl-2 ppl-3; do kcg get "roles/$rol" -r $R --fields id 2>/dev/null | jq -r '.id // empty'; done | jq -R . | jq -sc 'map(select(length>0))')"
+      if [ -n "$pol" ] && [ "$(echo "$ids" | jq length)" = 3 ]; then
+        kcg get "clients/$ap/authz/resource-server/permission" -r $R 2>/dev/null | jq -e '.[] | select(.name=="oa-beheer: rollen toekennen")' >/dev/null \
+          || jq -cn --arg p "$pol" '{name:"oa-beheer: rollen toekennen", resourceType:"Users", scopes:["map-roles"], policies:[$p], decisionStrategy:"UNANIMOUS"}' \
+            | kcg create "clients/$ap/authz/resource-server/permission/scope" -r $R -f - >/dev/null 2>&1
+        kcg get "clients/$ap/authz/resource-server/permission" -r $R 2>/dev/null | jq -e '.[] | select(.name=="oa-beheer: alleen ppl-rollen")' >/dev/null \
+          || jq -cn --arg p "$pol" --argjson r "$ids" '{name:"oa-beheer: alleen ppl-rollen", resourceType:"Roles", resources:$r, scopes:["map-role"], policies:[$p], decisionStrategy:"UNANIMOUS"}' \
+            | kcg create "clients/$ap/authz/resource-server/permission/scope" -r $R -f - >/dev/null 2>&1
+        if kcg get "clients/$ap/authz/resource-server/permission" -r $R 2>/dev/null | jq -e '[.[] | select(.name=="oa-beheer: rollen toekennen" or .name=="oa-beheer: alleen ppl-rollen")] | length == 2' >/dev/null; then
+          ok "Beheerportaal mag het PPL-niveau van medewerkers zetten (alleen de rollen ppl-1, ppl-2, ppl-3)"
+        else
+          waarschuw "Rechten voor het PPL-niveau in het portaal konden niet worden gezet."
+        fi
+      else
+        waarschuw "Rollen ppl-1, ppl-2, ppl-3 ontbreken; draai keycloak-beheer.sh en daarna dit opnieuw."
+      fi
+    fi
   fi
 
   # Gemeenten uit GEMEENTEN die nog niet bestaan.

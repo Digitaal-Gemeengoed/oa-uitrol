@@ -341,7 +341,9 @@ Bij anonimiseren versleutelt het platform persoonsgegevens per AVG-categorie. Wi
 | `ppl-2` | ook bijzondere persoonsgegevens (art. 9) |
 | `ppl-3` | ook strafrechtelijke gegevens (art. 10), en de versies van vóór het anonimiseren |
 
-`keycloak-beheer.sh` (zie hierboven) maakt de rollen aan, geeft elke medewerker zonder niveau `ppl-1`, en vraagt bij een nieuwe eigen gebruiker welk niveau die krijgt. Gebruikers die al bestonden voordat je het script draaide, krijgen pas een niveau als je het (opnieuw) draait. Een ander niveau geven: in het Keycloak-beheer (via de tunnel uit stap 10, realm `gemeenten`) bij **Users** → de gebruiker → **Role mapping** → **Assign role**, en kies `ppl-1`, `ppl-2` of `ppl-3`. Het nieuwe niveau geldt na opnieuw inloggen.
+`keycloak-beheer.sh` (zie hierboven) maakt de rollen aan, geeft elke medewerker zonder niveau `ppl-1`, en vraagt bij een nieuwe eigen gebruiker welk niveau die krijgt. Gebruikers die al bestonden voordat je het script draaide, krijgen pas een niveau als je het (opnieuw) draait. Een ander niveau geven: in het beheerportaal op de pagina **Medewerkers** (rechten `medewerkers.view` en `medewerkers.manage`), voor de medewerkers van de gemeente die je beheert, met een reden; niet voor jezelf. Het portaal mag daarvoor in Keycloak alleen de rollen `ppl-1`, `ppl-2` en `ppl-3` toekennen en weghalen (fijnmazige beheerrechten, gezet door `bijwerken.sh` op VPS 3). Zonder portaal kan het ook in het Keycloak-beheer (via de tunnel uit stap 10, realm `gemeenten`): **Users** → de gebruiker → **Role mapping** → **Assign role**. Het nieuwe niveau geldt na opnieuw inloggen; een lopende sessie houdt het oude niveau tot ze afloopt (uiterlijk na 8 uur).
+
+Het niveau geldt ook voor wie een stuk zelf heeft geanonimiseerd: na het bevestigen ziet ook de maker alleen de originelen binnen zijn eigen niveau.
 
 ### Metadatamodel
 

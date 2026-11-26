@@ -1,6 +1,6 @@
 # Office Assistent — anonimiseren in het document (ontwerp)
 
-*Prototype Digitaal GemeenGoed · 9 november 2026, aangevuld 25 november 2026 · besluiten van Erik Hoekstra*
+*Prototype Digitaal GemeenGoed · 9 november 2026, aangevuld 25 en 26 november 2026 · besluiten van Erik Hoekstra*
 
 ## Uitgangspunten (besloten)
 
@@ -27,6 +27,8 @@
 - **De lijst blijft.** Na Bevestigen blijven de kaarten staan, met status *bevestigd*.
 - **Herkennen bij openen.** Opent iemand een al geanonimiseerd document en start de assistent, dan leest `anonimiseren.hervat()` de plaatshouders in het document. Staan die in het register van het stuk (`GET /objecten/:id/pii`), dan bouwt de assistent de lijst daaruit op, ook als er geen voorvertoningen meer zijn.
 - **Originelen in de lijst.** *Originelen tonen* vraagt in één verzoek (`POST /objecten/:id/pii/onthul`) de waarden van alle gegevens binnen het niveau van de gebruiker op. Het platform controleert het niveau opnieuw en legt het inzien vast (`pii.ingezien`). Gegevens boven dat niveau blijven zonder waarde; de kaart noemt het benodigde niveau.
+- **Ook voor de maker** (besluit 26 november): wie een stuk anonimiseert, ziet na het bevestigen alleen de originelen binnen zijn eigen niveau. Toegang volgt de rol, niet het maken van het stuk. De herkende waarden boven dat niveau gaan na het bevestigen uit het paneel (`anonimiseren.beperkTotNiveau`).
+- **Het niveau instellen**: in het beheerportaal (pagina *Medewerkers*), per gemeente, met een reden en zonder je eigen niveau te kunnen wijzigen. Het niveau is de Keycloak-rol `ppl-1` tot `ppl-3`; het portaal mag in Keycloak alleen die rollen toekennen en weghalen. Een nieuw niveau geldt bij de volgende keer inloggen.
 - **Originelen in de tekst** (alleen LibreOffice Writer; adapter `toonPiiOriginelen`). Voorwaarden en werking:
 
 | Onderdeel | Uitwerking |

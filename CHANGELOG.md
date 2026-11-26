@@ -1,5 +1,13 @@
 # Wijzigingen
 
+## 0.38.0 — 2026-11-26
+
+**Het PPL-niveau van medewerkers instellen in het beheerportaal** (oa-beheer 0.19.0, pagina Medewerkers).
+- `bijwerken.sh` op VPS 3 zet in de realm `gemeenten` de fijnmazige beheerrechten aan en geeft het service-account van het portaal één recht: bij gebruikers de rollen `ppl-1`, `ppl-2` en `ppl-3` toekennen en weghalen. Andere rollen toekennen, gebruikers wijzigen of sessies beëindigen kan het portaal niet (getest tegen Keycloak 26.8.2).
+- Ook de maker van een geanonimiseerd stuk ziet na het bevestigen alleen de originelen binnen zijn eigen niveau (oa-paneel 0.24.1, oa-kern 0.16.1).
+- `INRICHTING.md`: niveau wijzigen via het portaal.
+- Uitrollen: `bijwerken.sh` op VPS 3 (Keycloak en het portaal), daarna op VPS 1 (de werkplaats). Geef daarna in het portaal bij **Groepen** de rechten Medewerkers (PPL-niveau) aan wie het niveau mag beheren.
+
 ## 0.37.3 — 2026-11-25
 
 - oa-adapters 0.24.1 (LibreOffice-extensie 0.19.1): een geanonimiseerd document dat als .docx is opgeslagen, wordt weer herkend. Uitrollen: `bijwerken.sh` op VPS 1, daarna de extensie 0.19.1 opnieuw installeren.
