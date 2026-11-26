@@ -1,5 +1,9 @@
 # Wijzigingen
 
+## 0.39.4 — 2026-11-26
+
+- `keycloak_gemeenten` (`bijwerken.sh` en `inlog.sh portaal` op VPS 3): het deel dat de rechten van het beheerportaal zet, stopte op VPS 3 zonder melding halverwege, waardoor de toestemmingen nooit werden aangemaakt en ook de rest van `bijwerken.sh` (koppelen van gemeenten, herstel bij inloggen) niet meer liep. Oorzaak: een mislukte kcadm-opdracht waarvan de uitvoer werd weggegooid, onder `set -e`. Nu is elke stap foutbestendig; mislukt er een, dan staat de melding van Keycloak in de uitvoer en gaat het script verder. De fijnmazige beheerrechten worden alleen aangezet als ze nog uit staan.
+
 ## 0.39.3 — 2026-11-26
 
 - `keycloak_gemeenten` (en daarmee `bijwerken.sh` en `inlog.sh portaal` op VPS 3): lukt het aanmaken of bijwerken van een toestemming voor het beheerportaal niet, dan staat de melding van Keycloak in de uitvoer. Voorheen werd die weggegooid, waardoor alleen "ontbreekt" zichtbaar was.

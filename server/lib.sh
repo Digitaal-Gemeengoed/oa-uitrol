@@ -389,24 +389,32 @@ keycloak_gemeenten() {
     # daarbij alleen de rollen medewerker, ppl-1, ppl-2 en ppl-3 toekennen.
     # Andere rollen (beheerder, vrijgever, realm-admin) en de instellingen van
     # de realm blijven buiten bereik.
-    local ap pol rol ids
-    kcg update "realms/$R" -s adminPermissionsEnabled=true >/dev/null 2>&1
-    ap="$(kcg get clients -r $R -q clientId=admin-permissions --fields id 2>/dev/null | jq -r '.[0].id // empty')"
+    # Elke stap is foutbestendig (set -e): mislukt er een, dan staat de
+    # melding van Keycloak in de uitvoer en gaat het script verder.
+    local ap="" pol="" rol ids="[]" uit perms
+    if [ "$(kcg get "realms/$R" 2>/dev/null | jq -r '.adminPermissionsEnabled // false' || true)" != true ]; then
+      uit="$(kcg update "realms/$R" -s adminPermissionsEnabled=true 2>&1)" \
+        || waarschuw "Fijnmazige beheerrechten aanzetten lukte niet: $(echo "$uit" | tr '\n' ' ' | cut -c1-300)"
+    fi
+    ap="$(kcg get clients -r $R -q clientId=admin-permissions --fields id 2>/dev/null | jq -r '.[0].id // empty' || true)"
     if [ -z "$ap" ]; then
       waarschuw "Keycloak kent geen fijnmazige beheerrechten (admin-permissions); het portaal kan medewerkers niet beheren."
     else
-      pol="$(kcg get "clients/$ap/authz/resource-server/policy" -r $R -q name=oa-beheer-portaal 2>/dev/null | jq -r '[.[] | select(.name=="oa-beheer-portaal")][0].id // empty')"
+      pol="$(kcg get "clients/$ap/authz/resource-server/policy" -r $R 2>/dev/null | jq -r '[.[] | select(.name=="oa-beheer-portaal")][0].id // empty' || true)"
       if [ -z "$pol" ]; then
-        jq -cn --arg c "$beheer" '{name:"oa-beheer-portaal", description:"Het service-account van het beheerportaal", clients:[$c], logic:"POSITIVE"}' \
-          | kcg create "clients/$ap/authz/resource-server/policy/client" -r $R -f - >/dev/null 2>&1
-        pol="$(kcg get "clients/$ap/authz/resource-server/policy" -r $R -q name=oa-beheer-portaal 2>/dev/null | jq -r '[.[] | select(.name=="oa-beheer-portaal")][0].id // empty')"
+        uit="$(jq -cn --arg c "$beheer" '{name:"oa-beheer-portaal", description:"Het service-account van het beheerportaal", clients:[$c], logic:"POSITIVE"}' \
+          | kcg create "clients/$ap/authz/resource-server/policy/client" -r $R -f - 2>&1)" \
+          || waarschuw "Beleid oa-beheer-portaal aanmaken lukte niet: $(echo "$uit" | tr '\n' ' ' | cut -c1-300)"
+        pol="$(kcg get "clients/$ap/authz/resource-server/policy" -r $R 2>/dev/null | jq -r '[.[] | select(.name=="oa-beheer-portaal")][0].id // empty' || true)"
       fi
-      ids="$(for rol in medewerker ppl-1 ppl-2 ppl-3; do kcg get "roles/$rol" -r $R --fields id 2>/dev/null | jq -r '.id // empty'; done | jq -R . | jq -sc 'map(select(length>0))')"
+      ids="$(for rol in medewerker ppl-1 ppl-2 ppl-3; do kcg get "roles/$rol" -r $R --fields id 2>/dev/null | jq -r '.id // empty' || true; done | jq -R . | jq -sc 'map(select(length>0))' || echo '[]')"
+      perms="$(kcg get "clients/$ap/authz/resource-server/permission" -r $R 2>&1)" || {
+        waarschuw "Toestemmingen lezen lukte niet: $(echo "$perms" | tr '\n' ' ' | cut -c1-300)"; perms='[]'; }
+      echo "$perms" | jq -e 'type=="array"' >/dev/null 2>&1 || perms='[]'
       # Eén toestemming zetten: bestaat ze (ook onder een oude naam), dan bijwerken.
-      # Lukt het niet, dan de melding van Keycloak tonen (anders blijft de oorzaak onzichtbaar).
       kc_toestemming() {
-        local naam="$1" oud="$2" lichaam="$3" id uit
-        id="$(kcg get "clients/$ap/authz/resource-server/permission" -r $R 2>/dev/null | jq -r --arg n "$naam" --arg o "$oud" '[.[] | select(.name==$n or .name==$o)][0].id // empty')"
+        local naam="$1" oud="$2" lichaam="$3" id
+        id="$(echo "$perms" | jq -r --arg n "$naam" --arg o "$oud" '[.[] | select(.name==$n or .name==$o)][0].id // empty' || true)"
         if [ -n "$id" ]; then
           uit="$(echo "$lichaam" | jq -c --arg id "$id" '. + {id:$id}' | kcg update "clients/$ap/authz/resource-server/permission/scope/$id" -r $R -f - 2>&1)" \
             || waarschuw "Toestemming '$naam' bijwerken lukte niet: $(echo "$uit" | tr '\n' ' ' | cut -c1-300)"
@@ -414,8 +422,13 @@ keycloak_gemeenten() {
           uit="$(echo "$lichaam" | kcg create "clients/$ap/authz/resource-server/permission/scope" -r $R -f - 2>&1)" \
             || waarschuw "Toestemming '$naam' aanmaken lukte niet: $(echo "$uit" | tr '\n' ' ' | cut -c1-300)"
         fi
+        return 0
       }
-      if [ -n "$pol" ] && [ "$(echo "$ids" | jq length)" = 4 ]; then
+      if [ -z "$pol" ]; then
+        waarschuw "Zonder beleid oa-beheer-portaal geen toestemmingen voor het portaal."
+      elif [ "$(echo "$ids" | jq length)" != 4 ]; then
+        waarschuw "Rollen medewerker en ppl-1 tot ppl-3 ontbreken (gevonden: $(echo "$ids" | jq length) van 4); draai keycloak-beheer.sh en daarna dit opnieuw."
+      else
         kc_toestemming "oa-beheer: rollen toekennen" "" \
           "$(jq -cn --arg p "$pol" '{name:"oa-beheer: rollen toekennen", resourceType:"Users", scopes:["map-roles"], policies:[$p], decisionStrategy:"UNANIMOUS"}')"
         kc_toestemming "oa-beheer: gebruikers beheren" "" \
@@ -423,13 +436,11 @@ keycloak_gemeenten() {
         kc_toestemming "oa-beheer: alleen medewerker- en ppl-rollen" "oa-beheer: alleen ppl-rollen" \
           "$(jq -cn --arg p "$pol" --argjson r "$ids" '{name:"oa-beheer: alleen medewerker- en ppl-rollen", resourceType:"Roles", resources:$r, scopes:["map-role"], policies:[$p], decisionStrategy:"UNANIMOUS"}')"
         if kcg get "clients/$ap/authz/resource-server/permission" -r $R 2>/dev/null \
-           | jq -e '[.[] | select(.name=="oa-beheer: rollen toekennen" or .name=="oa-beheer: gebruikers beheren" or .name=="oa-beheer: alleen medewerker- en ppl-rollen")] | length == 3' >/dev/null; then
+           | jq -e '[.[] | select(.name=="oa-beheer: rollen toekennen" or .name=="oa-beheer: gebruikers beheren" or .name=="oa-beheer: alleen medewerker- en ppl-rollen")] | length == 3' >/dev/null 2>&1; then
           ok "Beheerportaal mag medewerkers beheren (alleen de rollen medewerker en ppl-1 tot ppl-3)"
         else
-          waarschuw "Rechten voor medewerkerbeheer in het portaal konden niet worden gezet."
+          waarschuw "Rechten voor medewerkerbeheer in het portaal konden niet worden gezet (zie de meldingen hierboven)."
         fi
-      else
-        waarschuw "Rollen medewerker en ppl-1 tot ppl-3 ontbreken; draai keycloak-beheer.sh en daarna dit opnieuw."
       fi
     fi
   fi
